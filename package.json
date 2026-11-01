@@ -1,15 +1,21 @@
 {
-  "name": "pertemuan7",
+  "name": "makanan-khas-aseli-manado",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Project PAW Week 7 - halaman frontend dan API produk makanan khas Manado",
+  "main": "app.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "keywords": [],
-  "type": "commonjs",
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "ejs": "^7.0.2",
     "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
