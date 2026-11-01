@@ -9,38 +9,8 @@ Tech Stack
     Module System : CommonJS
 
 Struktur Project
-PAW-Project-MakananKhasAseliManado/
-├── config/
-│   └── config.js              → konfigurasi port dan nama aplikasi
-│
-├── controllers/
-│   ├── apiController.js       → mengatur response API
-│   └── homeController.js      → mengatur halaman utama
-│
-├── middlewares/
-│   └── logger.js              → mencatat HTTP request ke terminal
-│
-├── models/
-│   └── produkModel.js         → data statis produk makanan Manado
-│
-├── routes/
-│   ├── apiRoutes.js           → routing endpoint API
-│   └── webRoutes.js           → routing halaman website
-│
-├── utils/
-│   └── format.js              → format harga ke mata uang Rupiah
-│
-├── views/
-│   ├── partials/
-│   │   ├── head.ejs           → struktur HTML dan Tailwind CSS
-│   │   └── footer.ejs         → footer halaman
-│   │
-│   └── index.ejs              → halaman utama katalog produk
-│
-├── .gitignore                 → konfigurasi file yang diabaikan Git
-├── app.js                     → entry point aplikasi Express
-├── package.json               → konfigurasi project dan dependencies
-└── package-lock.json          → pengunci versi dependencies
+<img width="705" height="433" alt="image" src="https://github.com/user-attachments/assets/4f92bd95-87d2-4583-ae8b-cad9a9762198" />
+
 
 Fitur Aplikasi
     Katalog Makanan Khas Manado — Menampilkan daftar makanan beserta nama, deskripsi, kategori, dan harga.
