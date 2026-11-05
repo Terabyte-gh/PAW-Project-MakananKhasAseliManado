@@ -1,11 +1,13 @@
 const config = require('../config/config');
-const { getAllProduk } = require('../models/produkModel');
+const { getAllMakanan } = require('../models/makananModel');
 const { formatRupiah } = require('../utils/format');
 
-function index(req, res) {
+async function index(req, res) {
+  const produk = await getAllMakanan();
+
   res.render('index', {
     appName: config.appName,
-    produk: getAllProduk(),
+    produk,
     formatRupiah,
   });
 }
