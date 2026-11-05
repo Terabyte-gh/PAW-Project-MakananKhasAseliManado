@@ -1,43 +1,52 @@
 <%- include('partials/head', { appName }) %>
 
+<%
+const galeri = [
+  { src: '/images/tinutuan.jpg', alt: 'Semangkuk tinutuan khas Manado' },
+  { src: '/images/cakalang-dabu-dabu.jpg', alt: 'Ikan cakalang dengan sambal dabu-dabu' },
+  { src: '/images/cakalang-fufu.png', alt: 'Cakalang fufu yang diasap' },
+  { src: '/images/dabu-dabu.jpg', alt: 'Sambal dabu-dabu dalam mangkuk batu' },
+  { src: '/images/nasi-kuning.jpg', alt: 'Nasi kuning dengan lauk khas Manado' },
+];
+%>
+
   <header class="border-b border-stone-200 bg-white">
-    <nav class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+    <nav class="px-6 lg:px-10 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
         <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-700"></span>
         <%= appName %>
       </a>
       <div class="flex items-center gap-6 text-sm text-stone-600">
         <a href="#produk" class="hover:text-stone-900">Produk</a>
+        <a href="#galeri" class="hover:text-stone-900">Galeri</a>
         <a href="#api" class="hover:text-stone-900">API</a>
       </div>
     </nav>
   </header>
 
   <main>
-    <section class="max-w-5xl mx-auto px-6 pt-16 pb-12">
+    <section class="px-6 lg:px-10 pt-16 pb-12">
       <p class="text-xs font-medium uppercase tracking-widest text-amber-700">Kuliner Sulawesi Utara</p>
       <h1 class="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight"><%= appName %></h1>
-      <p class="mt-4 max-w-xl text-stone-600 leading-relaxed">
-        Kumpulan hidangan khas Manado yang diolah dari resep turun-temurun.
-        Data produk pada halaman ini diambil langsung dari backend Express.
+      <p class="mt-4 max-w-2xl text-stone-600 leading-relaxed">
+        Kumpulan hidangan khas Manado yang diolah dari resep yang sudah turun-temurun. jadi yang moba pesan pesan jo neh.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="#produk" class="inline-flex items-center rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800">
-          Lihat produk
+          Lihat Produk
         </a>
         <a href="/api/produk" class="inline-flex items-center rounded-md border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:border-stone-400">
-          Buka API produk
-        </a>
+          Endpoint produk</a>
       </div>
     </section>
 
-    <section id="produk" class="max-w-5xl mx-auto px-6 py-8">
+    <section id="produk" class="px-6 lg:px-10 py-8">
       <div class="flex items-baseline justify-between border-b border-stone-200 pb-4">
         <h2 class="text-xl font-semibold tracking-tight">Daftar Produk</h2>
         <span class="text-sm text-stone-500"><%= produk.length %> produk</span>
       </div>
 
-      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         <% produk.forEach(function (item) { %>
           <article class="flex flex-col rounded-lg border border-stone-200 bg-white p-5">
             <span class="text-xs font-medium uppercase tracking-wide text-stone-500">Stok: <%= item.stok %></span>
@@ -49,10 +58,38 @@
       </div>
     </section>
 
-    <section id="api" class="max-w-5xl mx-auto px-6 py-8">
+    <section id="galeri" class="px-6 lg:px-10 py-8">
+      <div class="flex items-baseline justify-between border-b border-stone-200 pb-4">
+        <h2 class="text-xl font-semibold tracking-tight">Galeri Makanan</h2>
+      </div>
+
+      <div class="relative mt-6">
+        <button type="button" data-galeri="prev" aria-label="Geser galeri ke kiri"
+          class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-stone-300 bg-white/90 text-lg text-stone-700 hover:bg-white">
+          &lt;
+        </button>
+
+        <div id="galeri-track" data-unique="<%= galeri.length %>" class="no-scrollbar flex gap-4 overflow-x-auto">
+          <% for (let salinan = 0; salinan < 3; salinan++) { %>
+            <% galeri.forEach(function (foto) { %>
+              <figure class="h-48 w-64 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white sm:h-60 sm:w-80">
+                <img src="<%= foto.src %>" alt="<%= foto.alt %>" loading="lazy" class="h-full w-full object-cover">
+              </figure>
+            <% }); %>
+          <% } %>
+        </div>
+
+        <button type="button" data-galeri="next" aria-label="Geser galeri ke kanan"
+          class="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-stone-300 bg-white/90 text-lg text-stone-700 hover:bg-white">
+          &gt;
+        </button>
+      </div>
+    </section>
+
+    <section id="api" class="px-6 lg:px-10 py-8">
       <div class="border-b border-stone-200 pb-4">
         <h2 class="text-xl font-semibold tracking-tight">Endpoint API</h2>
-        <p class="mt-2 text-sm text-stone-600">Endpoint Json.</p>
+        <p class="mt-2 text-sm text-stone-600">Endpoint</p>
       </div>
 
       <div class="mt-6 divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
@@ -61,17 +98,61 @@
             <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">GET</span>
             <code class="text-sm">/api/status</code>
           </div>
-          <span class="text-sm text-stone-500">Status dan uptime server</span>
+          <span class="text-sm text-stone-500">Status server</span>
         </a>
         <a href="/api/produk" class="flex flex-col gap-1 p-5 hover:bg-stone-50 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center gap-3">
             <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">GET</span>
             <code class="text-sm">/api/produk</code>
           </div>
-          <span class="text-sm text-stone-500">Array JSON berisi data produk</span>
+          <span class="text-sm text-stone-500">Daftar produk</span>
         </a>
       </div>
     </section>
   </main>
+
+  <script>
+    (function () {
+      const track = document.getElementById('galeri-track');
+      const prev = document.querySelector('[data-galeri="prev"]');
+      const next = document.querySelector('[data-galeri="next"]');
+      if (!track || !prev || !next) return;
+
+      const slides = Array.from(track.children);
+      const unique = Number(track.dataset.unique) || 1;
+      const loopWidth = slides[unique].offsetLeft - slides[0].offsetLeft;
+      const step = slides[0].offsetWidth + 16;
+      let paused = false;
+      let resumeTimer;
+
+      function autoScroll() {
+        if (!paused && loopWidth > 0) {
+          track.scrollLeft += 0.7;
+          if (track.scrollLeft >= loopWidth) track.scrollLeft -= loopWidth;
+        }
+        requestAnimationFrame(autoScroll);
+      }
+
+      function pauseSementara() {
+        paused = true;
+        clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(() => { paused = false; }, 1800);
+      }
+
+      track.addEventListener('mouseenter', () => { paused = true; });
+      track.addEventListener('mouseleave', () => { paused = false; });
+      track.addEventListener('touchstart', pauseSementara, { passive: true });
+
+      function geser(arah) {
+        pauseSementara();
+        track.scrollBy({ left: arah * step, behavior: 'smooth' });
+      }
+
+      prev.addEventListener('click', () => geser(-1));
+      next.addEventListener('click', () => geser(1));
+
+      requestAnimationFrame(autoScroll);
+    })();
+  </script>
 
 <%- include('partials/footer', { appName }) %>
