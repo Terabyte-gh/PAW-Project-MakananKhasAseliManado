@@ -25,6 +25,14 @@ app.use((req, res) => {
   });
 });
 
+app.use((err, req, res, next) => {
+  console.error(`[error] ${err.message}`);
+  res.status(500).json({
+    status: 'error',
+    message: 'Terjadi kesalahan pada server',
+  });
+});
+
 app.listen(config.port, () => {
   console.log(`Server ${config.appName} jalan di http://localhost:${config.port}`);
 });
