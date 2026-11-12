@@ -1,4 +1,6 @@
 const config = require('../config/config');
+const { searchMakananForChat } = require('../models/makananModel');
+const { jawabTentangMakanan } = require('../services/gemini.service');
 const {
   getAllMakanan,
   getMakananById,
@@ -15,6 +17,39 @@ function getStatus(req, res) {
     timestamp: new Date().toISOString(),
     uptime: `${process.uptime().toFixed(2)} detik`,
   });
+}
+
+async function postChat(req, res) {
+  const pertanyaan = String(req.body?.message || '').trim();
+  if (!pertanyaan || pertanyaan.length > 500) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Pertanyaan wajib diisi dan maksimal 500 karakter.',
+    });
+  }
+
+  if (/\b(resep|cara membuat|bahan|kandungan|asal|sejarah|manfaat|kalori|gizi|halal|pedas|rasa)\b/i.test(pertanyaan)) {
+    return res.status(200).json({
+      status: 'success',
+      reply: 'Maaf, informasi itu tidak ada di data makanan kami.',
+    });
+  }
+
+  const produk = await searchMakananForChat(pertanyaan);
+  if (produk.length === 0) {
+    return res.status(200).json({
+      status: 'success',
+      reply: 'Maaf, informasi itu tidak ada di data makanan kami.',
+    });
+  }
+
+  try {
+    const reply = await jawabTentangMakanan(pertanyaan, produk);
+    res.status(200).json({ status: 'success', reply });
+  } catch (error) {
+    if (!error.status) throw error;
+    res.status(error.status).json({ status: 'error', message: error.message });
+  }
 }
 
 function idValid(id) {
@@ -121,6 +156,7 @@ async function deleteProduk(req, res) {
 
 module.exports = {
   getStatus,
+  postChat,
   getProduk,
   getProdukById,
   createProduk,
