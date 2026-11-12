@@ -28,18 +28,23 @@ async function postChat(req, res) {
     });
   }
 
-  if (/\b(resep|cara membuat|bahan|kandungan|asal|sejarah|manfaat|kalori|gizi|halal|pedas|rasa)\b/i.test(pertanyaan)) {
+  const normalized = pertanyaan.toLocaleLowerCase('id-ID').replace(/[!?.,]+/g, ' ').trim();
+  const greetingOnly = /^(halo|hai|hi|hello|hei|pagi|selamat pagi|siang|selamat siang|sore|selamat sore|malam|selamat malam|apa kabar|assalamualaikum|assalamu alaikum|permisi|bang|bro|bg)( semua)?$/i.test(normalized);
+  if (greetingOnly) {
     return res.status(200).json({
       status: 'success',
-      reply: 'Maaf, informasi itu tidak ada di data makanan kami.',
+      reply: 'Halo, bro! 👋 Mau tanya nama makanan, harga, stok, atau deskripsi yang ada di katalog?',
     });
   }
 
   const produk = await searchMakananForChat(pertanyaan);
   if (produk.length === 0) {
+    const topikKatalog = /\b(makanan|menu|produk|harga|stok|deskripsi|berapa|ada|jual|jualan|katalog)\b/i.test(pertanyaan);
     return res.status(200).json({
       status: 'success',
-      reply: 'Maaf, informasi itu tidak ada di data makanan kami.',
+      reply: topikKatalog
+        ? 'Maaf, bro. Informasi itu tidak ada di data makanan kami.'
+        : 'Waduh bro! Itu di luar kemampuan saya. Saya cuma bisa bantu soal makanan yang ada di katalog.',
     });
   }
 
