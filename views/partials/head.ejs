@@ -8,6 +8,14 @@
   <style>
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    body > main { flex: 1 0 auto; }
+    button, a { transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+    button:active { transform: scale(.97); }
+    #chatbot-panel.chat-open { animation: chat-enter 180ms ease-out both; }
+    .chat-message { animation: chat-enter 180ms ease-out both; }
+    @keyframes chat-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
   </style>
 </head>
 <body class="bg-stone-50 text-stone-900 antialiased">
