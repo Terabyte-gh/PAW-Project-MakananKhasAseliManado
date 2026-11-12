@@ -4,6 +4,7 @@ const config = require('./config/config');
 const logger = require('./middlewares/logger');
 const webRoutes = require('./routes/webRoutes');
 const apiRoutes = require('./routes/apiRoutes');
+const { viewAdmin } = require('./middlewares/adminAuth');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(logger);
+app.use(viewAdmin);
 
 app.use('/', webRoutes);
 app.use('/api', apiRoutes);
