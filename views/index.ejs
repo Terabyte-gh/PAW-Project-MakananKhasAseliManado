@@ -17,9 +17,12 @@ const galeri = [
         <%= appName %>
       </a>
       <div class="flex items-center gap-6 text-sm text-stone-600">
-        <a href="#produk" class="hover:text-stone-900">Produk</a>
-        <a href="#galeri" class="hover:text-stone-900">Galeri</a>
-        <a href="#api" class="hover:text-stone-900">API</a>
+        <a href="/" class="hover:text-stone-900">Dashboard</a>
+        <% if (isAdmin) { %>
+          <form action="/admin/logout" method="post"><button class="hover:text-stone-900">Logout Admin</button></form>
+        <% } else { %>
+          <a href="/admin/login" class="hover:text-stone-900">Login Admin</a>
+        <% } %>
       </div>
     </nav>
   </header>
@@ -45,9 +48,9 @@ const galeri = [
         <h2 class="text-xl font-semibold tracking-tight">Daftar Produk</h2>
         <div class="flex items-center gap-4">
           <span class="text-sm text-stone-500"><%= produk.length %> produk</span>
-          <button type="button" id="btn-tambah" class="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800">
-            Tambah Produk
-          </button>
+          <% if (isAdmin) { %>
+            <button type="button" id="btn-tambah" class="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800">Tambah Produk</button>
+          <% } %>
         </div>
       </div>
 
@@ -59,7 +62,7 @@ const galeri = [
             <p class="mt-2 flex-1 text-sm leading-relaxed text-stone-600"><%= item.deskripsi %></p>
             <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
               <p class="text-sm font-semibold"><%= formatRupiah(item.harga) %></p>
-              <div class="flex items-center gap-3 text-xs">
+              <% if (isAdmin) { %><div class="flex items-center gap-3 text-xs">
                 <button type="button" data-edit
                   data-id="<%= item.id_makanan %>"
                   data-makanan="<%= item.makanan %>"
@@ -71,7 +74,7 @@ const galeri = [
                   data-id="<%= item.id_makanan %>"
                   data-makanan="<%= item.makanan %>"
                   class="text-red-700 hover:text-red-800">Hapus</button>
-              </div>
+              </div><% } %>
             </div>
           </article>
         <% }); %>
@@ -158,7 +161,7 @@ const galeri = [
     </section>
   </main>
 
-  <div id="modal-produk" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/40 px-4">
+  <% if (isAdmin) { %><div id="modal-produk" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/40 px-4">
     <div class="w-full max-w-md rounded-lg border border-stone-200 bg-white p-6">
       <div class="flex items-center justify-between">
         <h2 id="modal-judul" class="text-lg font-semibold tracking-tight">Tambah Produk</h2>
@@ -210,7 +213,7 @@ const galeri = [
         </div>
       </form>
     </div>
-  </div>
+  </div><% } %>
 
   <script>
     (function () {
@@ -311,7 +314,7 @@ const galeri = [
         try {
           const response = await fetch(id ? `/api/produk/${id}` : '/api/produk', {
             method: id ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '<%= csrfToken %>' },
             body: JSON.stringify(data),
           });
           const hasil = await response.json();
@@ -334,7 +337,10 @@ const galeri = [
           if (!confirm(`Hapus "${tombol.dataset.makanan}"?`)) return;
 
           try {
-            const response = await fetch(`/api/produk/${tombol.dataset.id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/produk/${tombol.dataset.id}`, {
+              method: 'DELETE',
+              headers: { 'X-CSRF-Token': '<%= csrfToken %>' },
+            });
 
             if (!response.ok) {
               alert('Gagal menghapus produk');
@@ -390,6 +396,7 @@ const galeri = [
       function setOpen(open) {
         panel.classList.toggle('hidden', !open);
         panel.classList.toggle('flex', open);
+        panel.classList.toggle('chat-open', open);
         panel.setAttribute('aria-hidden', String(!open));
         toggle.setAttribute('aria-expanded', String(open));
         if (open) input.focus();
@@ -398,8 +405,8 @@ const galeri = [
       function tambahPesan(text, fromUser) {
         const bubble = document.createElement('p');
         bubble.className = fromUser
-          ? 'ml-auto max-w-[90%] rounded-lg bg-stone-900 p-3 text-sm text-white'
-          : 'max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm';
+          ? 'chat-message ml-auto max-w-[90%] rounded-lg bg-stone-900 p-3 text-sm text-white'
+          : 'chat-message max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm';
         bubble.textContent = text;
         messages.appendChild(bubble);
         messages.scrollTop = messages.scrollHeight;
