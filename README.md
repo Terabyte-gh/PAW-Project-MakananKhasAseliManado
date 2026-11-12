@@ -45,18 +45,15 @@ Chatbot Gemini
         GEMINI_API_KEY=isi_api_key_di_sini
         GEMINI_MODEL=gemini-3.8-flash
 
-    Endpoint chatbot: POST /api/chat dengan body JSON { "message": "Harga Tinutuan berapa?" }.
-    Pertanyaan tentang item yang tidak ada atau informasi yang tidak disimpan di database akan dijawab bahwa informasinya tidak ada.
 
 Autentikasi Admin
-    Pengunjung hanya dapat melihat katalog. Admin yang login dapat menambah, mengubah, dan menghapus produk.
+    user hanya dapat melihat katalog. Admin bisa crud.
     Buat hash password secara lokal dengan `node scripts/generateAdminHash.js`, lalu salin hasilnya ke .env bersama username:
 
         ADMIN_USERNAME=admin
         ADMIN_PASSWORD_HASH=scrypt$salt$hash
 
-    Jangan isi ADMIN_PASSWORD_HASH dengan password polos. Sesi admin memakai cookie HttpOnly, SameSite=Strict,
-    token CSRF untuk operasi CRUD, dan kedaluwarsa setelah 8 jam. Di production, jalankan di HTTPS agar cookie Secure aktif.
+ 
 
 Endpoint
 | Method | Endpoint | Deskripsi |
