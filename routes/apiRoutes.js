@@ -4,6 +4,7 @@ const apiController = require('../controllers/apiController');
 const router = express.Router();
 
 router.get('/status', apiController.getStatus);
+router.post('/chat', apiController.postChat);
 router.get('/produk', apiController.getProduk);
 router.get('/produk/:id', apiController.getProdukById);
 router.post('/produk', apiController.createProduk);

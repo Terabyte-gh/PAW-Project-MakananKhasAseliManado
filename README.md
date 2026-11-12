@@ -37,6 +37,17 @@ Cara Nge run
 Server default akan jalan di : http://localhost:8000
 Port juga dapat diubah menggunakan environment variable PORT.
 
+Chatbot Gemini
+    Chatbot tersedia lewat ikon pesan di pojok kanan bawah halaman utama.
+    Chatbot hanya memakai nama, harga, stok, dan deskripsi dari tabel makanan.
+    Isi kunci API lokal di file .env (file ini tidak ikut disimpan ke Git):
+
+        GEMINI_API_KEY=isi_api_key_di_sini
+        GEMINI_MODEL=gemini-3.8-flash
+
+    Endpoint chatbot: POST /api/chat dengan body JSON { "message": "Harga Tinutuan berapa?" }.
+    Pertanyaan tentang item yang tidak ada atau informasi yang tidak disimpan di database akan dijawab bahwa informasinya tidak ada.
+
 Endpoint
 | Method | Endpoint | Deskripsi |
 |---|---|---|

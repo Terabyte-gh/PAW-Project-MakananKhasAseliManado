@@ -109,8 +109,6 @@ const galeri = [
     <section id="api" class="px-6 lg:px-10 py-8">
       <div class="border-b border-stone-200 pb-4">
         <h2 class="text-xl font-semibold tracking-tight">Endpoint API</h2>
-        <p class="mt-2 text-sm text-stone-600">Endpoint JSON untuk operasi CRUD produk.</p>
-        <p class="mt-1 text-sm text-stone-500">Baris bertanda <code>:id</code> dan method POST/PUT/DELETE diuji lewat Postman, bukan diklik dari browser.</p>
       </div>
 
       <div class="mt-6 divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
@@ -348,6 +346,100 @@ const galeri = [
             alert('Tidak bisa menghubungi server');
           }
         });
+      });
+    })();
+  </script>
+
+  <section id="chatbot-panel" aria-label="Chatbot makanan" aria-hidden="true"
+    class="fixed bottom-24 right-4 z-40 hidden h-[min(36rem,calc(100vh-8rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xl sm:right-6">
+    <header class="flex items-center justify-between bg-stone-900 px-4 py-3 text-white">
+      <div>
+        <h2 class="font-semibold">Chat Makanan Manado</h2>
+        <p class="text-xs text-stone-300">Jawaban berdasarkan data katalog</p>
+      </div>
+      <button id="chat-close" type="button" aria-label="Tutup chatbot" class="rounded px-2 py-1 text-xl hover:bg-stone-700">&times;</button>
+    </header>
+    <div id="chat-messages" aria-live="polite" class="flex-1 space-y-3 overflow-y-auto bg-stone-50 p-4">
+      <p class="max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm">Halo! Tanya nama makanan, harga, stok, atau deskripsi yang ada di katalog.</p>
+    </div>
+    <form id="chat-form" class="flex gap-2 border-t border-stone-200 bg-white p-3">
+      <input id="chat-input" name="message" maxlength="500" required autocomplete="off"
+        placeholder="Tulis pertanyaan..." aria-label="Pertanyaan untuk chatbot"
+        class="min-w-0 flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none">
+      <button id="chat-send" type="submit" class="rounded-md bg-stone-900 px-3 py-2 text-sm font-medium text-white hover:bg-stone-800">Kirim</button>
+    </form>
+  </section>
+
+  <button id="chat-toggle" type="button" aria-label="Buka chatbot makanan" aria-expanded="false"
+    class="fixed bottom-5 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-stone-900 text-white shadow-lg hover:bg-stone-700 sm:right-6">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-7 w-7">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M7 9h10M7 13h6m-7 7-3 1 1-4a8 8 0 1 1 3 3Z" />
+    </svg>
+  </button>
+
+  <script>
+    (function () {
+      const panel = document.getElementById('chatbot-panel');
+      const toggle = document.getElementById('chat-toggle');
+      const close = document.getElementById('chat-close');
+      const form = document.getElementById('chat-form');
+      const input = document.getElementById('chat-input');
+      const messages = document.getElementById('chat-messages');
+      const send = document.getElementById('chat-send');
+
+      function setOpen(open) {
+        panel.classList.toggle('hidden', !open);
+        panel.classList.toggle('flex', open);
+        panel.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        if (open) input.focus();
+      }
+
+      function tambahPesan(text, fromUser) {
+        const bubble = document.createElement('p');
+        bubble.className = fromUser
+          ? 'ml-auto max-w-[90%] rounded-lg bg-stone-900 p-3 text-sm text-white'
+          : 'max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm';
+        bubble.textContent = text;
+        messages.appendChild(bubble);
+        messages.scrollTop = messages.scrollHeight;
+        return bubble;
+      }
+
+      toggle.addEventListener('click', () => setOpen(panel.classList.contains('hidden')));
+      close.addEventListener('click', () => setOpen(false));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !panel.classList.contains('hidden')) setOpen(false);
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const message = input.value.trim();
+        if (!message) return;
+        tambahPesan(message, true);
+        input.value = '';
+        input.disabled = true;
+        send.disabled = true;
+        send.textContent = '...';
+        const pending = tambahPesan('Sedang mencari di data makanan...', false);
+
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message }),
+          });
+          const result = await response.json();
+          pending.textContent = result.reply || result.message || 'Maaf, chatbot sedang tidak bisa menjawab.';
+        } catch (error) {
+          pending.textContent = 'Tidak bisa menghubungi server. Coba lagi nanti.';
+        } finally {
+          input.disabled = false;
+          send.disabled = false;
+          send.textContent = 'Kirim';
+          input.focus();
+          messages.scrollTop = messages.scrollHeight;
+        }
       });
     })();
   </script>
