@@ -189,8 +189,21 @@ async function createPesanan(req, res) {
   const jumlah = Number(req.body?.jumlah);
   const tanggal = String(req.body?.tanggal_acara || '').trim();
   const alamat = String(req.body?.alamat || '').trim();
-  if (!nama || nama.length > 100 || !idValid(idMakanan) || !Number.isInteger(jumlah) || jumlah < 1 || jumlah > 10000 || !alamat || alamat.length > 500 || !/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
-    return res.status(400).json({ status: 'error', message: 'Nama, menu, jumlah porsi, tanggal acara, dan alamat harus diisi dengan benar.' });
+  const latitudeRaw = req.body?.latitude;
+  const longitudeRaw = req.body?.longitude;
+  const lokasiManual = req.body?.lokasi_manual === true;
+  const hasLatitude = latitudeRaw !== undefined && latitudeRaw !== null && latitudeRaw !== '';
+  const hasLongitude = longitudeRaw !== undefined && longitudeRaw !== null && longitudeRaw !== '';
+  const latitude = !lokasiManual && hasLatitude ? Number(latitudeRaw) : null;
+  const longitude = !lokasiManual && hasLongitude ? Number(longitudeRaw) : null;
+  if (!nama || nama.length > 100 || !idValid(idMakanan) || !Number.isInteger(jumlah) || jumlah < 1 || jumlah > 10000 || !alamat || alamat.length > 500 || !/^\d{4}-\d{2}-\d{2}$/.test(tanggal) || (!lokasiManual && (!hasLatitude || !hasLongitude)) || (!lokasiManual && (hasLatitude !== hasLongitude || !Number.isFinite(latitude) || !Number.isFinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180))) {
+    return res.status(400).json({ status: 'error', message: 'Nama, menu, jumlah porsi, tanggal, dan alamat harus diisi dengan benar.' });
+  }
+  if (lokasiManual && !/\bmanado\b/i.test(alamat)) {
+    return res.status(400).json({ status: 'error', message: 'Untuk alamat manual, cantumkan kata "Manado" pada alamat.' });
+  }
+  if (hasLatitude && jarakMeter(latitude, longitude, 1.482384, 124.840379) > 15000) {
+    return res.status(400).json({ status: 'error', message: 'Lokasi pengantaran harus berada di sekitar Manado.' });
   }
   const tanggalValid = new Date(`${tanggal}T00:00:00Z`);
   if (Number.isNaN(tanggalValid.getTime()) || tanggalValid.toISOString().slice(0, 10) !== tanggal) {
@@ -201,10 +214,19 @@ async function createPesanan(req, res) {
 
   const kode = `MAN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
   const pesanan = await pesananModel.buatPesanan({
-    kode, nama, makanan: makanan.makanan, jumlah, tanggal, alamat,
+    kode, nama, makanan: makanan.makanan, jumlah, tanggal, alamat, latitude, longitude,
     total: Number(makanan.harga) * jumlah,
   });
   res.status(201).json({ status: 'success', message: 'Pesanan berhasil dicatat.', data: pesanan });
+}
+
+function jarakMeter(lat1, lon1, lat2, lon2) {
+  const rad = (degrees) => degrees * Math.PI / 180;
+  const dLat = rad(lat2 - lat1);
+  const dLon = rad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 async function getStatusPesanan(req, res) {

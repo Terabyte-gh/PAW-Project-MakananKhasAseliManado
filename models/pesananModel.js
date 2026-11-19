@@ -1,13 +1,13 @@
 const pool = require('../config/database');
 
-async function buatPesanan({ kode, nama, makanan, jumlah, tanggal, alamat, total }) {
+async function buatPesanan({ kode, nama, makanan, jumlah, tanggal, alamat, latitude, longitude, total }) {
   const result = await pool.query(
     `INSERT INTO pesanan
-      (kode_pesanan, nama_pelanggan, makanan, jumlah_porsi, tanggal_acara, alamat, total_harga)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (kode_pesanan, nama_pelanggan, makanan, jumlah_porsi, tanggal_acara, alamat, latitude, longitude, total_harga)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING id_pesanan, kode_pesanan, nama_pelanggan, makanan, jumlah_porsi,
-       tanggal_acara, alamat, total_harga, status, dibuat_pada`,
-    [kode, nama, makanan, jumlah, tanggal, alamat, total]
+       tanggal_acara, alamat, latitude, longitude, total_harga, status, dibuat_pada`,
+    [kode, nama, makanan, jumlah, tanggal, alamat, latitude, longitude, total]
   );
   return result.rows[0];
 }
@@ -24,7 +24,7 @@ async function getPesananByKode(kode) {
 async function getAllPesanan() {
   const result = await pool.query(
     `SELECT id_pesanan, kode_pesanan, nama_pelanggan, makanan, jumlah_porsi,
-       tanggal_acara, alamat, total_harga, status, dibuat_pada
+       tanggal_acara, alamat, latitude, longitude, total_harga, status, dibuat_pada
      FROM pesanan ORDER BY dibuat_pada DESC`
   );
   return result.rows;

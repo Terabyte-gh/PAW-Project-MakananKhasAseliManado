@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= appName %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <script src="/vendor/leaflet/leaflet.js"></script>
   <style>
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -14,6 +16,7 @@
     button:active { transform: scale(.97); }
     #chatbot-panel.chat-open { animation: chat-enter 180ms ease-out both; }
     .chat-message { animation: chat-enter 180ms ease-out both; }
+    .manado-map-pin { background: transparent; border: 0; text-align: center; font-size: 26px; line-height: 30px; }
     @keyframes chat-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
   </style>

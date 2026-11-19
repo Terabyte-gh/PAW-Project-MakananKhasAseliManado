@@ -69,7 +69,7 @@ const galeri = [
         <table class="w-full min-w-[850px] text-left text-sm">
           <thead class="bg-stone-50 text-stone-600"><tr>
             <th class="p-3">Kode / Pelanggan</th><th class="p-3">Menu</th><th class="p-3">Porsi</th>
-            <th class="p-3">Tanggal acara</th><th class="p-3">Alamat</th><th class="p-3">Status</th>
+            <th class="p-3">Tanggal acara</th><th class="p-3">Alamat / Lokasi</th><th class="p-3">Status</th>
           </tr></thead>
           <tbody class="divide-y divide-stone-100">
           <% pesanan.forEach(function (item) { %>
@@ -77,7 +77,7 @@ const galeri = [
               <td class="p-3"><div class="font-medium"><%= item.kode_pesanan %> <% if (item.status === 'Baru') { %><span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Baru</span><% } %></div><div class="mt-1 text-stone-500"><%= item.nama_pelanggan %></div></td>
               <td class="p-3"><%= item.makanan %></td><td class="p-3"><%= item.jumlah_porsi %></td>
               <td class="p-3"><%= new Date(item.tanggal_acara).toLocaleDateString('id-ID') %></td>
-              <td class="max-w-xs p-3"><%= item.alamat %></td>
+              <td class="max-w-xs p-3"><div><%= item.alamat %></div><% if (item.latitude != null && item.longitude != null) { %><a class="mt-1 inline-block text-xs text-blue-700 underline" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=<%= item.latitude %>&mlon=<%= item.longitude %>#map=17/<%= item.latitude %>/<%= item.longitude %>">Lihat titik di peta</a><% } %></td>
               <td class="p-3"><form data-form-status data-id="<%= item.id_pesanan %>" class="flex gap-2">
                 <select name="status" class="rounded border border-stone-300 px-2 py-1">
                   <% ['Baru', 'Diproses', 'Selesai'].forEach(function (status) { %><option value="<%= status %>" <%= item.status === status ? 'selected' : '' %>><%= status %></option><% }); %>
@@ -488,6 +488,9 @@ const galeri = [
       const products = JSON.parse(messages.dataset.products || '[]');
       let orderStep = null;
       let orderDraft = null;
+      let activeMap = null;
+      let activeMapElement = null;
+      const batasAntarMeter = 15000;
 
       function setOpen(open) {
         panel.classList.toggle('hidden', !open);
@@ -529,7 +532,103 @@ const galeri = [
         products.forEach((product) => tombolPilihan(`${product.nama} — ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(product.harga))}`, { orderMenu: String(product.id) }));
       }
 
+      function tampilkanPetaAlamat() {
+        if (typeof L === 'undefined') {
+          tambahPesan('Peta gagal dimuat. Muat ulang halaman lalu coba pilih lokasi lagi.', false);
+          return;
+        }
+        if (activeMap) activeMap.remove();
+        if (activeMapElement) activeMapElement.remove();
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chat-message max-w-full rounded-lg bg-white p-3 text-sm shadow-sm';
+        const instruksi = document.createElement('p');
+        instruksi.textContent = 'Pilih titik di peta jika tampil. Jika tidak, ketik alamat atau patokan lengkap secara manual di chat. Pengantaran hanya untuk daerah Manado.';
+        const mapElement = document.createElement('div');
+        mapElement.style.height = '210px';
+        mapElement.style.width = '100%';
+        mapElement.style.position = 'relative';
+        mapElement.style.overflow = 'hidden';
+        mapElement.style.backgroundColor = '#e5e7eb';
+        mapElement.className = 'mt-2 rounded border border-stone-300';
+        const statusLokasi = document.createElement('p');
+        statusLokasi.className = 'mt-2 text-xs text-stone-600';
+        statusLokasi.textContent = 'Titik lokasi belum dipilih.';
+        wrapper.append(instruksi, mapElement, statusLokasi);
+        messages.appendChild(wrapper);
+        activeMapElement = wrapper;
+
+        const manadoCenter = L.latLng(1.482384, 124.840379);
+        const lingkaran = L.circle(manadoCenter, { radius: batasAntarMeter });
+        const map = L.map(mapElement, {
+          scrollWheelZoom: false,
+          maxBounds: lingkaran.getBounds(),
+          maxBoundsViscosity: 1,
+        }).setView(manadoCenter, 14);
+        activeMap = map;
+        statusLokasi.textContent = `Leaflet ${L.version} aktif; menyiapkan ukuran peta...`;
+        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+        });
+        let jumlahTileMasuk = 0;
+        let jumlahTileGagal = 0;
+        tiles.on('tileload', () => { jumlahTileMasuk += 1; });
+        tiles.on('loading', () => {
+          statusLokasi.textContent = 'Memuat peta OpenStreetMap...';
+        });
+        tiles.on('load', () => {
+          statusLokasi.textContent = 'Peta siap. Klik titik pengantaran di dalam lingkaran.';
+        });
+        tiles.on('tileerror', () => {
+          jumlahTileGagal += 1;
+          statusLokasi.textContent = 'Tile peta gagal dimuat dari OpenStreetMap. Periksa koneksi internet lalu muat ulang halaman.';
+        });
+        tiles.addTo(map);
+        lingkaran.addTo(map);
+
+        let marker = null;
+        let lokasiValidTerakhir = null;
+        function pilihTitik(latlng) {
+          if (map.distance(manadoCenter, latlng) > batasAntarMeter) {
+            statusLokasi.textContent = 'Titik di luar area pengantaran Manado. Pilih titik di dalam lingkaran.';
+            return false;
+          }
+          if (!marker) {
+            marker = L.marker(latlng, {
+              draggable: true,
+              icon: L.divIcon({ className: 'manado-map-pin', html: '<span aria-hidden="true">📍</span>', iconSize: [32, 32], iconAnchor: [16, 30] }),
+            }).addTo(map);
+            marker.on('dragend', () => {
+              const titik = marker.getLatLng();
+              if (!pilihTitik(titik)) marker.setLatLng(lokasiValidTerakhir);
+            });
+          } else {
+            marker.setLatLng(latlng);
+          }
+          lokasiValidTerakhir = latlng;
+          orderDraft.latitude = latlng.lat;
+          orderDraft.longitude = latlng.lng;
+          statusLokasi.textContent = `Lokasi dipilih: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}. Pin bisa digeser.`;
+          return true;
+        }
+        map.on('click', (event) => pilihTitik(event.latlng));
+        requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+        setTimeout(() => {
+          map.invalidateSize({ pan: false });
+          if (jumlahTileMasuk === 0 && jumlahTileGagal === 0) {
+            const size = map.getSize();
+            statusLokasi.textContent = `Leaflet ${L.version} aktif (${size.x}×${size.y}px), belum menerima tile peta.`;
+          }
+        }, 1500);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
       function mulaiPesanan(idProduct) {
+        if (activeMap) activeMap.remove();
+        if (activeMapElement) activeMapElement.remove();
+        activeMap = null;
+        activeMapElement = null;
         orderDraft = {};
         if (idProduct) {
           const product = products.find((item) => String(item.id) === String(idProduct));
@@ -572,14 +671,18 @@ const galeri = [
           if (!jawaban || jawaban.length > 100) { tambahPesan('Nama wajib diisi dan maksimal 100 karakter.', false); return; }
           orderDraft.nama = jawaban;
           orderStep = 'alamat';
-          tambahPesan('Tuliskan alamat pengantaran.', false);
+          tambahPesan('Atur lokasi pengantaran. Kamu bisa memilih titik di peta atau mengetik alamat secara manual.', false);
+          tampilkanPetaAlamat();
         } else if (orderStep === 'alamat') {
           if (!jawaban || jawaban.length > 500) { tambahPesan('Alamat wajib diisi dan maksimal 500 karakter.', false); return; }
           orderDraft.alamat = jawaban;
           orderStep = 'konfirmasi';
           const total = Number(orderDraft.product.harga) * orderDraft.jumlah;
           const rupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(total);
-          tambahPesan(`Rangkuman pesanan:\nNama: ${orderDraft.nama}\nMenu: ${orderDraft.product.nama}\nJumlah: ${orderDraft.jumlah} porsi\nTanggal: ${orderDraft.tanggal}\nAlamat: ${orderDraft.alamat}\nTotal: ${rupiah}\n\nKetik "Ya" untuk menyimpan atau "Ubah" untuk mengisi ulang.`, false);
+          const titikPeta = Number.isFinite(orderDraft.latitude) && Number.isFinite(orderDraft.longitude)
+            ? `${orderDraft.latitude.toFixed(6)}, ${orderDraft.longitude.toFixed(6)}`
+            : 'tidak dipilih (alamat diisi manual)';
+          tambahPesan(`Rangkuman pesanan:\nNama: ${orderDraft.nama}\nMenu: ${orderDraft.product.nama}\nJumlah: ${orderDraft.jumlah} porsi\nTanggal: ${orderDraft.tanggal}\nAlamat: ${orderDraft.alamat}\nTitik peta: ${titikPeta}\nTotal: ${rupiah}\n\nKetik "Ya" untuk menyimpan atau "Ubah" untuk mengisi ulang.`, false);
           tombolPilihan('Ya, konfirmasi', { orderAction: 'ya' });
           tombolPilihan('Ubah pesanan', { orderAction: 'ubah' });
         } else if (orderStep === 'konfirmasi') {
@@ -605,6 +708,9 @@ const galeri = [
               jumlah: orderDraft.jumlah,
               tanggal_acara: orderDraft.tanggal,
               alamat: orderDraft.alamat,
+              latitude: orderDraft.latitude ?? null,
+              longitude: orderDraft.longitude ?? null,
+              lokasi_manual: !Number.isFinite(orderDraft.latitude) || !Number.isFinite(orderDraft.longitude),
             }),
           });
           const result = await response.json();
