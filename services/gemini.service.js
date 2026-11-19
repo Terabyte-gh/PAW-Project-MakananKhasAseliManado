@@ -47,7 +47,7 @@ async function jawabTentangMakanan(pertanyaan, produk) {
     .trim();
 
   if (!jawaban) {
-    const error = new Error('Gemini belum memberikan jawaban. Coba tanyakan dengan cara lain.');
+    const error = new Error('belum bisa memberikan jawaban. Coba tanyakan dengan cara lain.');
     error.status = 502;
     throw error;
   }
