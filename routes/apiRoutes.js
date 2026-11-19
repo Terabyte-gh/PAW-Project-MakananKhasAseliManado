@@ -6,6 +6,10 @@ const router = express.Router();
 
 router.get('/status', apiController.getStatus);
 router.post('/chat', apiController.postChat);
+router.post('/pesanan', apiController.createPesanan);
+router.get('/pesanan/status/:kode', apiController.getStatusPesanan);
+router.get('/pesanan', requireAdmin, apiController.getPesanan);
+router.patch('/pesanan/:id/status', requireAdmin, apiController.updateStatusPesanan);
 router.get('/produk', apiController.getProduk);
 router.get('/produk/:id', apiController.getProdukById);
 router.post('/produk', requireAdmin, apiController.createProduk);

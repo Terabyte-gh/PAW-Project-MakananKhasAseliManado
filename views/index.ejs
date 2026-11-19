@@ -43,6 +43,56 @@ const galeri = [
       </div>
     </section>
 
+    <section id="cek-pesanan" class="px-6 lg:px-10 py-8">
+      <div class="max-w-xl border-b border-stone-200 pb-4">
+        <h2 class="text-xl font-semibold tracking-tight">Cek Status Pesanan</h2>
+        <p class="mt-1 text-sm text-stone-500">Masukkan kode pesanan untuk melihat status terbaru.</p>
+        <form id="form-cek-pesanan" class="mt-4 flex gap-2">
+          <input name="kode" required maxlength="16" placeholder="Contoh: MAN-A1B2C3D4"
+            class="min-w-0 flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm">
+          <button class="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white">Cek</button>
+        </form>
+        <p id="hasil-cek-pesanan" aria-live="polite" class="mt-3 text-sm text-stone-600"></p>
+      </div>
+    </section>
+
+    <% if (isAdmin) { %>
+    <section id="daftar-pesanan" class="px-6 lg:px-10 py-8">
+      <div class="border-b border-stone-200 pb-4">
+        <h2 class="text-xl font-semibold tracking-tight">Daftar Pesanan</h2>
+        <p class="mt-1 text-sm text-stone-500">Pesanan terbaru ditampilkan lebih dahulu.</p>
+      </div>
+      <% if (pesanan.length === 0) { %>
+        <p class="mt-5 text-sm text-stone-500">Belum ada pesanan masuk.</p>
+      <% } else { %>
+      <div class="mt-5 overflow-x-auto rounded-lg border border-stone-200 bg-white">
+        <table class="w-full min-w-[850px] text-left text-sm">
+          <thead class="bg-stone-50 text-stone-600"><tr>
+            <th class="p-3">Kode / Pelanggan</th><th class="p-3">Menu</th><th class="p-3">Porsi</th>
+            <th class="p-3">Tanggal acara</th><th class="p-3">Alamat</th><th class="p-3">Status</th>
+          </tr></thead>
+          <tbody class="divide-y divide-stone-100">
+          <% pesanan.forEach(function (item) { %>
+            <tr>
+              <td class="p-3"><div class="font-medium"><%= item.kode_pesanan %> <% if (item.status === 'Baru') { %><span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Baru</span><% } %></div><div class="mt-1 text-stone-500"><%= item.nama_pelanggan %></div></td>
+              <td class="p-3"><%= item.makanan %></td><td class="p-3"><%= item.jumlah_porsi %></td>
+              <td class="p-3"><%= new Date(item.tanggal_acara).toLocaleDateString('id-ID') %></td>
+              <td class="max-w-xs p-3"><%= item.alamat %></td>
+              <td class="p-3"><form data-form-status data-id="<%= item.id_pesanan %>" class="flex gap-2">
+                <select name="status" class="rounded border border-stone-300 px-2 py-1">
+                  <% ['Baru', 'Diproses', 'Selesai'].forEach(function (status) { %><option value="<%= status %>" <%= item.status === status ? 'selected' : '' %>><%= status %></option><% }); %>
+                </select><button class="rounded bg-stone-900 px-3 py-1 text-white">Simpan</button>
+              </form></td>
+            </tr>
+          <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+      <p id="hasil-update-status" aria-live="polite" class="mt-3 text-sm text-stone-600"></p>
+    </section>
+    <% } %>
+
     <section id="produk" class="px-6 lg:px-10 py-8">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-4">
         <h2 class="text-xl font-semibold tracking-tight">Daftar Produk</h2>
@@ -62,6 +112,9 @@ const galeri = [
             <p class="mt-2 flex-1 text-sm leading-relaxed text-stone-600"><%= item.deskripsi %></p>
             <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
               <p class="text-sm font-semibold"><%= formatRupiah(item.harga) %></p>
+              <div class="flex items-center gap-3">
+                <button type="button" data-order-product="<%= item.id_makanan %>"
+                  class="rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-800">Pesan</button>
               <% if (isAdmin) { %><div class="flex items-center gap-3 text-xs">
                 <button type="button" data-edit
                   data-id="<%= item.id_makanan %>"
@@ -75,6 +128,7 @@ const galeri = [
                   data-makanan="<%= item.makanan %>"
                   class="text-red-700 hover:text-red-800">Hapus</button>
               </div><% } %>
+              </div>
             </div>
           </article>
         <% }); %>
@@ -356,6 +410,43 @@ const galeri = [
     })();
   </script>
 
+  <script>
+    (function () {
+      const formCek = document.getElementById('form-cek-pesanan');
+      const hasilCek = document.getElementById('hasil-cek-pesanan');
+      formCek.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hasilCek.textContent = 'Memeriksa kode pesanan...';
+        const kode = new FormData(formCek).get('kode').trim();
+        try {
+          const response = await fetch(`/api/pesanan/status/${encodeURIComponent(kode)}`);
+          const result = await response.json();
+          hasilCek.textContent = response.ok
+            ? `Pesanan ${result.data.kode_pesanan}: ${result.data.status}`
+            : (result.message || 'Kode pesanan tidak ditemukan.');
+        } catch (_) { hasilCek.textContent = 'Tidak bisa menghubungi server.'; }
+      });
+
+      const hasilUpdate = document.getElementById('hasil-update-status');
+      document.querySelectorAll('[data-form-status]').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const status = new FormData(form).get('status');
+          try {
+            const response = await fetch(`/api/pesanan/${form.dataset.id}/status`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '<%= csrfToken %>' },
+              body: JSON.stringify({ status }),
+            });
+            const result = await response.json();
+            if (!response.ok) { hasilUpdate.textContent = result.message || 'Gagal memperbarui status.'; return; }
+            window.location.reload();
+          } catch (_) { hasilUpdate.textContent = 'Tidak bisa menghubungi server.'; }
+        });
+      });
+    })();
+  </script>
+
   <section id="chatbot-panel" aria-label="Chatbot makanan" aria-hidden="true"
     class="fixed bottom-24 right-4 z-40 hidden h-[min(36rem,calc(100vh-8rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xl sm:right-6">
     <header class="flex items-center justify-between bg-stone-900 px-4 py-3 text-white">
@@ -365,8 +456,10 @@ const galeri = [
       </div>
       <button id="chat-close" type="button" aria-label="Tutup chatbot" class="rounded px-2 py-1 text-xl hover:bg-stone-700">&times;</button>
     </header>
-    <div id="chat-messages" aria-live="polite" class="flex-1 space-y-3 overflow-y-auto bg-stone-50 p-4">
-      <p class="max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm">Halo! Tanya nama makanan, harga, stok, atau deskripsi yang ada di katalog.</p>
+    <div id="chat-messages" data-products="<%= JSON.stringify(produk.map(function (item) { return { id: item.id_makanan, nama: item.makanan, harga: item.harga }; })) %>" aria-live="polite" class="flex-1 space-y-3 overflow-y-auto bg-stone-50 p-4">
+      <p class="max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm">Halo! Ada Yang bisa saya bantu mengenai makanan manado?</p>
+      <button type="button" data-chat-quick="menu" class="rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100">Lihat Menu</button>
+      <button type="button" data-order-start class="rounded-full border border-amber-700 bg-amber-700 px-3 py-1.5 text-sm text-white hover:bg-amber-800">Pesan Sekarang</button>
     </div>
     <form id="chat-form" class="flex gap-2 border-t border-stone-200 bg-white p-3">
       <input id="chat-input" name="message" maxlength="500" required autocomplete="off"
@@ -392,6 +485,9 @@ const galeri = [
       const input = document.getElementById('chat-input');
       const messages = document.getElementById('chat-messages');
       const send = document.getElementById('chat-send');
+      const products = JSON.parse(messages.dataset.products || '[]');
+      let orderStep = null;
+      let orderDraft = null;
 
       function setOpen(open) {
         panel.classList.toggle('hidden', !open);
@@ -413,8 +509,133 @@ const galeri = [
         return bubble;
       }
 
+      function tombolPilihan(label, attributes) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mr-2 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100';
+        button.textContent = label;
+        Object.entries(attributes).forEach(([key, value]) => button.dataset[key] = value);
+        messages.appendChild(button);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function tampilkanPilihanMenu() {
+        if (!products.length) {
+          tambahPesan('Belum ada menu yang bisa dipesan. Silakan coba lagi nanti.', false);
+          orderStep = null;
+          return;
+        }
+        tambahPesan('Pilih menu yang ingin dipesan:', false);
+        products.forEach((product) => tombolPilihan(`${product.nama} — ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(product.harga))}`, { orderMenu: String(product.id) }));
+      }
+
+      function mulaiPesanan(idProduct) {
+        orderDraft = {};
+        if (idProduct) {
+          const product = products.find((item) => String(item.id) === String(idProduct));
+          if (!product) { tambahPesan('Menu tidak ditemukan. Silakan muat ulang halaman.', false); return; }
+          orderDraft.product = product;
+          orderStep = 'jumlah';
+          tambahPesan(`Kamu memilih ${product.nama}. Berapa jumlah porsi yang ingin dipesan?`, false);
+          return;
+        }
+        orderStep = 'menu';
+        tampilkanPilihanMenu();
+      }
+
+      function formatTanggal(tanggal) {
+        const [tahun, bulan, hari] = tanggal.split('-');
+        const nilai = new Date(Date.UTC(Number(tahun), Number(bulan) - 1, Number(hari)));
+        return /^\d{4}-\d{2}-\d{2}$/.test(tanggal) && nilai.toISOString().slice(0, 10) === tanggal;
+      }
+
+      async function prosesJawabanPesanan(message) {
+        const jawaban = message.trim();
+        if (orderStep === 'menu') {
+          const product = products.find((item) => String(item.id) === jawaban || item.nama.toLocaleLowerCase('id-ID') === jawaban.toLocaleLowerCase('id-ID'));
+          if (!product) { tambahPesan('Pilih menu dari tombol yang tersedia atau ketik nama menu dengan tepat.', false); return; }
+          orderDraft.product = product;
+          orderStep = 'jumlah';
+          tambahPesan('Berapa jumlah porsi yang ingin dipesan?', false);
+        } else if (orderStep === 'jumlah') {
+          const jumlah = Number(jawaban);
+          if (!Number.isInteger(jumlah) || jumlah < 1 || jumlah > 10000) { tambahPesan('Masukkan jumlah porsi berupa angka bulat minimal 1.', false); return; }
+          orderDraft.jumlah = jumlah;
+          orderStep = 'tanggal';
+          tambahPesan('Tanggal acara kapan? Gunakan format YYYY-MM-DD, contoh 2026-12-25.', false);
+        } else if (orderStep === 'tanggal') {
+          if (!formatTanggal(jawaban)) { tambahPesan('Format tanggal belum valid. Gunakan YYYY-MM-DD, contoh 2026-12-25.', false); return; }
+          orderDraft.tanggal = jawaban;
+          orderStep = 'nama';
+          tambahPesan('Siapa nama pemesan?', false);
+        } else if (orderStep === 'nama') {
+          if (!jawaban || jawaban.length > 100) { tambahPesan('Nama wajib diisi dan maksimal 100 karakter.', false); return; }
+          orderDraft.nama = jawaban;
+          orderStep = 'alamat';
+          tambahPesan('Tuliskan alamat pengantaran.', false);
+        } else if (orderStep === 'alamat') {
+          if (!jawaban || jawaban.length > 500) { tambahPesan('Alamat wajib diisi dan maksimal 500 karakter.', false); return; }
+          orderDraft.alamat = jawaban;
+          orderStep = 'konfirmasi';
+          const total = Number(orderDraft.product.harga) * orderDraft.jumlah;
+          const rupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(total);
+          tambahPesan(`Rangkuman pesanan:\nNama: ${orderDraft.nama}\nMenu: ${orderDraft.product.nama}\nJumlah: ${orderDraft.jumlah} porsi\nTanggal: ${orderDraft.tanggal}\nAlamat: ${orderDraft.alamat}\nTotal: ${rupiah}\n\nKetik "Ya" untuk menyimpan atau "Ubah" untuk mengisi ulang.`, false);
+          tombolPilihan('Ya, konfirmasi', { orderAction: 'ya' });
+          tombolPilihan('Ubah pesanan', { orderAction: 'ubah' });
+        } else if (orderStep === 'konfirmasi') {
+          if (/^ubah$/i.test(jawaban)) {
+            tambahPesan('Baik, kita mulai ulang pesanan.', false);
+            mulaiPesanan();
+          } else if (/^ya$/i.test(jawaban)) {
+            await kirimPesanan();
+          } else {
+            tambahPesan('Pilih "Ya, konfirmasi" untuk menyimpan atau "Ubah pesanan" untuk mengulang.', false);
+          }
+        }
+      }
+
+      async function kirimPesanan() {
+        try {
+          const response = await fetch('/api/pesanan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nama: orderDraft.nama,
+              id_makanan: orderDraft.product.id,
+              jumlah: orderDraft.jumlah,
+              tanggal_acara: orderDraft.tanggal,
+              alamat: orderDraft.alamat,
+            }),
+          });
+          const result = await response.json();
+          if (!response.ok) { tambahPesan(result.message || 'Pesanan gagal disimpan. Silakan coba lagi.', false); return; }
+          orderStep = null;
+          orderDraft = null;
+          tambahPesan(`Pesanan berhasil dicatat. Kode pesanan kamu: ${result.data.kode_pesanan}. Simpan kode ini untuk mengecek status pesanan.`, false);
+        } catch (_) { tambahPesan('Tidak bisa menghubungi server. Pesanan belum tersimpan, silakan coba lagi.', false); }
+      }
+
       toggle.addEventListener('click', () => setOpen(panel.classList.contains('hidden')));
       close.addEventListener('click', () => setOpen(false));
+      messages.addEventListener('click', (event) => {
+        const startButton = event.target.closest('[data-order-start]');
+        if (startButton) { tambahPesan('Saya ingin memesan.', true); mulaiPesanan(); return; }
+        const menuButton = event.target.closest('[data-order-menu]');
+        if (menuButton) { const product = products.find((item) => String(item.id) === menuButton.dataset.orderMenu); if (product) { tambahPesan(product.nama, true); prosesJawabanPesanan(String(product.id)); } return; }
+        const actionButton = event.target.closest('[data-order-action]');
+        if (actionButton) { const action = actionButton.dataset.orderAction; tambahPesan(action === 'ya' ? 'Ya' : 'Ubah', true); prosesJawabanPesanan(action); return; }
+        const quickButton = event.target.closest('[data-chat-quick]');
+        if (!quickButton) return;
+        input.value = quickButton.dataset.chatQuick;
+        form.requestSubmit();
+      });
+      document.querySelectorAll('[data-order-product]').forEach((button) => {
+        button.addEventListener('click', () => {
+          setOpen(true);
+          tambahPesan(`Saya ingin memesan ${button.closest('article').querySelector('h3').textContent}.`, true);
+          mulaiPesanan(button.dataset.orderProduct);
+        });
+      });
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && !panel.classList.contains('hidden')) setOpen(false);
       });
@@ -425,6 +646,7 @@ const galeri = [
         if (!message) return;
         tambahPesan(message, true);
         input.value = '';
+        if (orderStep) { prosesJawabanPesanan(message); return; }
         input.disabled = true;
         send.disabled = true;
         send.textContent = '...';

@@ -30,6 +30,10 @@ function requireAdmin(req, res, next) {
   if (!session) {
     return res.status(401).json({ status: 'error', message: 'Login admin diperlukan.' });
   }
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    req.admin = true;
+    return next();
+  }
   const csrf = req.get('x-csrf-token') || req.body?._csrf;
   const csrfBuffer = Buffer.from(String(csrf || ''));
   const expectedCsrfBuffer = Buffer.from(session.csrf);
