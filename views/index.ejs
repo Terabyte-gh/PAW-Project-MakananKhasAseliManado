@@ -113,8 +113,8 @@ const galeri = [
             <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
               <p class="text-sm font-semibold"><%= formatRupiah(item.harga) %></p>
               <div class="flex items-center gap-3">
-                <button type="button" data-order-product="<%= item.id_makanan %>"
-                  class="rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-800">Pesan</button>
+                <% if (!isAdmin) { %><button type="button" data-order-product="<%= item.id_makanan %>"
+                  class="rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-800">Pesan</button><% } %>
               <% if (isAdmin) { %><div class="flex items-center gap-3 text-xs">
                 <button type="button" data-edit
                   data-id="<%= item.id_makanan %>"
