@@ -36,6 +36,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(config.port, () => {
-  console.log(`Server ${config.appName} jalan di http://localhost:${config.port}`);
-});
+if (require.main === module) {
+  app.listen(config.port, () => {
+    console.log(`Server ${config.appName} jalan di http://localhost:${config.port}`);
+  });
+}
+
+module.exports = app;
