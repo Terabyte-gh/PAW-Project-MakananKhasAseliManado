@@ -32,11 +32,11 @@ async function postChat(req, res) {
   }
 
   const normalized = pertanyaan.toLocaleLowerCase('id-ID').replace(/[!?.,]+/g, ' ').trim();
-  const greetingOnly = /^(halo|hai|hi|hello|hei|pagi|selamat pagi|siang|selamat siang|sore|selamat sore|malam|selamat malam|apa kabar|assalamualaikum|assalamu alaikum|permisi|bang|bro|bg)( semua)?$/i.test(normalized);
+  const greetingOnly = /^(halo|hai|hi|hello|hei|pagi|selamat pagi|siang|selamat siang|sore|selamat sore|malam|selamat malam|apa kabar|assalamualaikum|assalamu alaikum|permisi|bang|bro|bg)( semua)?( bang| bro| kak| mas| mbak| gan| min)?$/i.test(normalized);
   if (greetingOnly) {
     return res.status(200).json({
       status: 'success',
-      reply: 'Halo, bro! 👋 Mau tanya nama makanan, harga, stok, atau deskripsi yang ada di katalog?',
+      reply: 'Halo, bro! 👋 Mau lihat menu, pesan makanan, atau tanya harga, stok, dan deskripsi menu? Kamu bisa pilih tombol yang tersedia di chat ini.',
     });
   }
 
