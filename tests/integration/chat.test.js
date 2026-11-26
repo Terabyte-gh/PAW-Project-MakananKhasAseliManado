@@ -55,7 +55,7 @@ describe('API integration: chat and order routes', () => {
     expect(query).not.toHaveBeenCalled();
 
     const response = await request(app).post('/api/pesanan').send({
-      nama: 'Ayu', id_makanan: 1, jumlah: 2, tanggal_acara: '2026-12-25', alamat: 'Manado',
+      nama: 'Ayu', id_makanan: 1, jumlah: 2, tanggal_acara: '2026-12-25', alamat: 'Manado', lokasi_manual: true,
     });
     expect(response.status).toBe(201);
     expect(response.body.data).toMatchObject({ nama_pelanggan: 'Ayu', makanan: 'Tinutuan', total_harga: 50000 });

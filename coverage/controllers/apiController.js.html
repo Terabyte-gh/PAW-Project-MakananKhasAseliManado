@@ -34,30 +34,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">34.86% </span>
+                <span class="strong">36.5% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>38/109</span>
+                <span class='fraction'>46/126</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">34.83% </span>
+                <span class="strong">34.42% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>31/89</span>
+                <span class='fraction'>42/122</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20% </span>
+                <span class="strong">17.64% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/15</span>
+                <span class='fraction'>3/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">37.25% </span>
+                <span class="strong">38.98% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>38/102</span>
+                <span class='fraction'>46/118</span>
             </div>
         
             
@@ -318,7 +318,29 @@
 <a name='L242'></a><a href='#L242'>242</a>
 <a name='L243'></a><a href='#L243'>243</a>
 <a name='L244'></a><a href='#L244'>244</a>
-<a name='L245'></a><a href='#L245'>245</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -509,8 +531,21 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -525,6 +560,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -753,8 +797,21 @@ async function createPesanan(req, res) {
   const jumlah = Number(req.body?.jumlah);
   const tanggal = String(req.body?.tanggal_acara || '').trim();
   const alamat = String(req.body?.alamat || '').trim();
-  <span class="missing-if-branch" title="else path not taken" >E</span>if (!nama || nama.length &gt; 100 || !idValid(idMakanan) || !Number.isInteger(jumlah) || jumlah &lt; 1 || jumlah &gt; 10000 || !alamat || alamat.length &gt; 500 || !/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
-    return res.status(400).json({ status: 'error', message: 'Nama, menu, jumlah porsi, tanggal acara, dan alamat harus diisi dengan benar.' });
+  const latitudeRaw = req.body?.latitude;
+  const longitudeRaw = req.body?.longitude;
+  const lokasiManual = req.body?.lokasi_manual === true;
+  const hasLatitude = latitudeRaw !== undefined &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >latitudeRaw !== null </span>&amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >latitudeRaw !== '';</span>
+  const hasLongitude = longitudeRaw !== undefined &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >longitudeRaw !== null </span>&amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >longitudeRaw !== '';</span>
+  const latitude = !lokasiManual &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >hasLatitude </span>? <span class="branch-0 cbranch-no" title="branch not covered" >Number(latitudeRaw) </span>: null;
+  const longitude = !lokasiManual &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >hasLongitude </span>? <span class="branch-0 cbranch-no" title="branch not covered" >Number(longitudeRaw) </span>: null;
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!nama || nama.length &gt; 100 || !idValid(idMakanan) || !Number.isInteger(jumlah) || jumlah &lt; 1 || jumlah &gt; 10000 || !alamat || alamat.length &gt; 500 || !/^\d{4}-\d{2}-\d{2}$/.test(tanggal) || (<span class="branch-9 cbranch-no" title="branch not covered" >!lokasiManual </span>&amp;&amp; (<span class="branch-10 cbranch-no" title="branch not covered" >!hasLatitude </span>|| !hasLongitude)) || (<span class="branch-12 cbranch-no" title="branch not covered" >!lokasiManual </span>&amp;&amp; (<span class="branch-13 cbranch-no" title="branch not covered" >hasLatitude !== hasLongitude </span>|| <span class="branch-14 cbranch-no" title="branch not covered" >!Number.isFinite(latitude) </span>|| <span class="branch-15 cbranch-no" title="branch not covered" >!Number.isFinite(longitude) </span>|| <span class="branch-16 cbranch-no" title="branch not covered" >latitude &lt; -90 </span>|| <span class="branch-17 cbranch-no" title="branch not covered" >latitude &gt; 90 </span>|| <span class="branch-18 cbranch-no" title="branch not covered" >longitude &lt; -180 </span>|| longitude &gt; 180))) {
+    return res.status(400).json({ status: 'error', message: 'Nama, menu, jumlah porsi, tanggal, dan alamat harus diisi dengan benar.' });
+  }
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (lokasiManual &amp;&amp; !/\bmanado\b/i.test(alamat)) {
+<span class="cstat-no" title="statement not covered" >    return res.status(400).json({ status: 'error', message: 'Untuk alamat manual, cantumkan kata "Manado" pada alamat.' });</span>
+  }
+<span class="cstat-no" title="statement not covered" >  if (hasLatitude &amp;&amp; jarakMeter(latitude, longitude, 1.482384, 124.840379) &gt; 15000) {</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(400).json({ status: 'error', message: 'Lokasi pengantaran harus berada di sekitar Manado.' });</span>
   }
   const tanggalValid = new Date(`${tanggal}T00:00:00Z`);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (Number.isNaN(tanggalValid.getTime()) || tanggalValid.toISOString().slice(0, 10) !== tanggal) {
@@ -765,10 +822,19 @@ async function createPesanan(req, res) {
 &nbsp;
   const kode = `MAN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
   const pesanan = await pesananModel.buatPesanan({
-    kode, nama, makanan: makanan.makanan, jumlah, tanggal, alamat,
+    kode, nama, makanan: makanan.makanan, jumlah, tanggal, alamat, latitude, longitude,
     total: Number(makanan.harga) * jumlah,
   });
   res.status(201).json({ status: 'success', message: 'Pesanan berhasil dicatat.', data: pesanan });
+}
+&nbsp;
+function <span class="fstat-no" title="function not covered" >jarakMeter(</span>lat1, lon1, lat2, lon2) {
+  const rad = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>egrees) =&gt; <span class="cstat-no" title="statement not covered" >degrees * Math.PI / 180;</span></span>
+  const dLat = <span class="cstat-no" title="statement not covered" >rad(lat2 - lat1);</span>
+  const dLon = <span class="cstat-no" title="statement not covered" >rad(lon2 - lon1);</span>
+  const a = <span class="cstat-no" title="statement not covered" >Math.sin(dLat / 2) ** 2</span>
+    + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
+<span class="cstat-no" title="statement not covered" >  return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));</span>
 }
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >getStatusPesanan(</span>req, res) {
@@ -813,7 +879,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://vitest.dev/" target="_blank" rel="noopener noreferrer">Vitest</a>
-                at 2026-11-26T07:26:37.925Z
+                at 2026-11-26T07:47:59.830Z
             </div>
         <script src="../prettify.js"></script>
         <script>
