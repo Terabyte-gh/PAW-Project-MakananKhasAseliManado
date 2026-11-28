@@ -8,7 +8,7 @@ module.exports = defineConfig({
     restoreMocks: true,
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html'],
+      reporter: 'text',
       include: ['utils/**/*.js', 'models/**/*.js', 'controllers/apiController.js', 'services/**/*.js'],
       exclude: ['**/node_modules/**'],
     },
