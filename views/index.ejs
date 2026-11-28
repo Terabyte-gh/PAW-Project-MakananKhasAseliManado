@@ -2,308 +2,684 @@
 
 <%
 const galeri = [
-  { src: '/images/tinutuan.jpg', alt: 'Semangkuk tinutuan khas Manado' },
-  { src: '/images/cakalang-dabu-dabu.jpg', alt: 'Ikan cakalang dengan sambal dabu-dabu' },
-  { src: '/images/cakalang-fufu.png', alt: 'Cakalang fufu yang diasap' },
-  { src: '/images/dabu-dabu.jpg', alt: 'Sambal dabu-dabu dalam mangkuk batu' },
-  { src: '/images/nasi-kuning.jpg', alt: 'Nasi kuning dengan lauk khas Manado' },
+  { src: '/images/tinutuan.jpg', alt: 'Semangkuk tinutuan hangat khas Manado', caption: 'Tinutuan sayur segar', width: 736, height: 1308 },
+  { src: '/images/cakalang-dabu-dabu.jpg', alt: 'Ikan cakalang goreng dengan sambal dabu-dabu', caption: 'Cakalang dabu-dabu', width: 819, height: 1024 },
+  { src: '/images/cakalang-fufu.png', alt: 'Cakalang fufu asap khas Sulawesi Utara', caption: 'Cakalang fufu asap', width: 400, height: 296 },
+  { src: '/images/dabu-dabu.jpg', alt: 'Sambal dabu-dabu segar dalam mangkuk batu', caption: 'Sambal dabu-dabu segar', width: 1081, height: 1600 },
+  { src: '/images/nasi-kuning.jpg', alt: 'Nasi kuning dengan lauk khas Manado', caption: 'Nasi kuning khas Manado', width: 747, height: 1328 },
+];
+
+function cariFotoProduk(nama) {
+  const n = String(nama || '').toLocaleLowerCase('id-ID');
+  if (n.includes('tinutuan') || n.includes('bubur')) return galeri[0];
+  if (n.includes('fufu')) return galeri[2];
+  if (n.includes('cakalang')) return galeri[1];
+  if (n.includes('dabu') || n.includes('sambal') || n.includes('rica')) return galeri[3];
+  if (n.includes('nasi kuning') || n.includes('nasi')) return galeri[4];
+  return null;
+}
+
+const featuredDish = produk.length > 0 ? produk[0] : null;
+const featuredPhoto = featuredDish ? (cariFotoProduk(featuredDish.makanan) || galeri[0]) : galeri[0];
+const heroPhoto = featuredPhoto.src === galeri[1].src ? galeri[0] : galeri[1];
+const sisaProduk = produk.length > 1 ? produk.slice(1) : [];
+
+const endpoints = [
+  { method: 'GET', path: '/api/status', href: '/api/status', desc: 'Status kesehatan server' },
+  { method: 'GET', path: '/api/produk', href: '/api/produk', desc: 'Daftar seluruh hidangan' },
+  { method: 'GET', path: '/api/produk/:id', href: '/api/produk/1', desc: 'Detail hidangan (contoh ID 1)' },
+  { method: 'GET', path: '/api/pesanan/status/:kode', href: null, desc: 'Lacak status kode pesanan' },
+  { method: 'POST', path: '/api/produk', href: null, desc: 'Tambah menu baru (admin)' },
+  { method: 'PUT', path: '/api/produk/:id', href: null, desc: 'Perbarui data menu (admin)' },
+  { method: 'DELETE', path: '/api/produk/:id', href: null, desc: 'Hapus menu (admin)' },
 ];
 %>
 
-  <header class="border-b border-stone-200 bg-white">
-    <nav class="px-6 lg:px-10 h-16 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
-        <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-700"></span>
-        <%= appName %>
-      </a>
-      <div class="flex items-center gap-6 text-sm text-stone-600">
-        <a href="/" class="hover:text-stone-900">Dashboard</a>
+  <header class="site-header">
+    <nav class="container site-nav" aria-label="Navigasi utama">
+      <a href="/" class="brand-wordmark"><%= appName %></a>
+
+      <div class="nav-links-desktop">
+        <a href="#produk" class="nav-link">Menu</a>
+        <a href="#galeri" class="nav-link">Galeri</a>
+        <a href="#cek-pesanan" class="nav-link">Cek Pesanan</a>
+        <a href="#api" class="nav-link">API</a>
         <% if (isAdmin) { %>
-          <form action="/admin/logout" method="post"><button class="hover:text-stone-900">Logout Admin</button></form>
+          <a href="#daftar-pesanan" class="nav-link">Pesanan Masuk</a>
+          <form action="/admin/logout" method="post" style="margin:0;">
+            <button type="submit" class="nav-auth-btn">Logout Admin</button>
+          </form>
         <% } else { %>
-          <a href="/admin/login" class="hover:text-stone-900">Login Admin</a>
+          <a href="/admin/login" class="nav-auth-btn">Login Admin</a>
         <% } %>
       </div>
+
+      <button type="button" id="mobile-nav-toggle" class="nav-mobile-toggle"
+        aria-expanded="false" aria-controls="mobile-nav-drawer" aria-label="Buka menu navigasi">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
     </nav>
+
+    <div id="mobile-nav-drawer" class="nav-mobile-drawer" hidden>
+      <a href="#produk" class="nav-link">Menu</a>
+      <a href="#galeri" class="nav-link">Galeri</a>
+      <a href="#cek-pesanan" class="nav-link">Cek Pesanan</a>
+      <a href="#api" class="nav-link">API</a>
+      <% if (isAdmin) { %>
+        <a href="#daftar-pesanan" class="nav-link">Pesanan Masuk</a>
+        <form action="/admin/logout" method="post" style="margin-top:0.35rem;">
+          <button type="submit" class="nav-auth-btn">Logout Admin</button>
+        </form>
+      <% } else { %>
+        <a href="/admin/login" class="nav-auth-btn" style="margin-top:0.35rem;">Login Admin</a>
+      <% } %>
+    </div>
   </header>
 
-  <main>
-    <section class="px-6 lg:px-10 pt-16 pb-12">
-      <p class="text-xs font-medium uppercase tracking-widest text-amber-700">Kuliner Sulawesi Utara</p>
-      <h1 class="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight"><%= appName %></h1>
-      <p class="mt-4 max-w-2xl text-stone-600 leading-relaxed">
-        Kumpulan hidangan khas Manado yang diolah dari resep yang sudah turun-temurun. jadi yang moba pesan pesan jo neh.
-      </p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <a href="#produk" class="inline-flex items-center rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800">
-          Lihat Produk
-        </a>
-        <a href="/api/produk" class="inline-flex items-center rounded-md border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:border-stone-400">
-          Endpoint produk</a>
-      </div>
-    </section>
+  <main id="konten-utama">
+    <section class="hero-section">
+      <div class="container hero-grid">
+        <div class="t-stagger" id="hero-stagger">
+          <div class="t-stagger-line t-stagger-line--1">
+            <h1 class="hero-title"><%= appName %></h1>
+          </div>
+          <div class="t-stagger-line t-stagger-line--2">
+            <p class="hero-lead">
+              Kumpulan hidangan khas Sulawesi Utara yang diolah dari resep turun-temurun. Hangat untuk jamuan keluarga maupun pesanan acara di Manado, jadi yang moba pesan, pesan jo neh.
+            </p>
+          </div>
+          <div class="t-stagger-line t-stagger-line--3">
+            <div class="hero-actions">
+              <a href="#produk" class="btn btn-primary">Lihat Daftar Menu</a>
+              <button type="button" id="hero-open-chat" class="btn btn-secondary">Pesan via Chat</button>
+            </div>
+          </div>
+          <div class="t-stagger-line t-stagger-line--4">
+            <dl class="hero-facts">
+              <div class="hero-fact-item">
+                <dt>Hidangan di katalog</dt>
+                <dd class="mono"><%= produk.length %> menu</dd>
+              </div>
+              <div class="hero-fact-item">
+                <dt>Jam operasional</dt>
+                <dd>08.00 sampai 20.00 WITA</dd>
+              </div>
+              <div class="hero-fact-item">
+                <dt>Jangkauan antar</dt>
+                <dd>Wilayah Manado (15 km)</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
 
-    <section id="cek-pesanan" class="px-6 lg:px-10 py-8">
-      <div class="max-w-xl border-b border-stone-200 pb-4">
-        <h2 class="text-xl font-semibold tracking-tight">Cek Status Pesanan</h2>
-        <p class="mt-1 text-sm text-stone-500">Masukkan kode pesanan untuk melihat status terbaru.</p>
-        <form id="form-cek-pesanan" class="mt-4 flex gap-2">
-          <input name="kode" required maxlength="16" placeholder="Contoh: MAN-A1B2C3D4"
-            class="min-w-0 flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm">
-          <button class="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white">Cek</button>
-        </form>
-        <p id="hasil-cek-pesanan" aria-live="polite" class="mt-3 text-sm text-stone-600"></p>
+        <figure class="hero-photo-frame" style="margin:0;">
+          <div class="hero-photo-viewport">
+            <img src="<%= heroPhoto.src %>"
+              alt="<%= heroPhoto.alt %>"
+              width="<%= heroPhoto.width %>" height="<%= heroPhoto.height %>" fetchpriority="high"
+              class="hero-photo-img">
+          </div>
+          <figcaption class="hero-photo-caption">
+            <span class="hero-photo-dish"><%= heroPhoto.caption %></span>
+            <span class="hero-photo-note">Masakan rumahan Sulawesi Utara</span>
+          </figcaption>
+        </figure>
       </div>
     </section>
 
     <% if (isAdmin) { %>
-    <section id="daftar-pesanan" class="px-6 lg:px-10 py-8">
-      <div class="border-b border-stone-200 pb-4">
-        <h2 class="text-xl font-semibold tracking-tight">Daftar Pesanan</h2>
-        <p class="mt-1 text-sm text-stone-500">Pesanan terbaru ditampilkan lebih dahulu.</p>
+    <section id="daftar-pesanan" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Daftar Pesanan Masuk</h2>
+            <p class="section-subtitle">Pesanan terbaru ditampilkan lebih dahulu untuk segera diproses dapur.</p>
+          </div>
+          <div class="section-meta">
+            <span class="section-count mono"><%= pesanan.length %> pesanan</span>
+          </div>
+        </div>
+
+        <% if (pesanan.length === 0) { %>
+          <div class="empty-state-box">
+            <p class="empty-state-title">Belum ada pesanan masuk</p>
+            <p class="empty-state-copy">Pesanan pelanggan yang dikirim melalui asisten chat akan langsung tercatat di daftar ini.</p>
+          </div>
+        <% } else { %>
+          <div class="table-panel">
+            <table class="order-table">
+              <thead>
+                <tr>
+                  <th scope="col">Kode dan Pelanggan</th>
+                  <th scope="col">Menu</th>
+                  <th scope="col">Porsi</th>
+                  <th scope="col">Tanggal Acara</th>
+                  <th scope="col">Alamat dan Lokasi</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% pesanan.forEach(function (item) { %>
+                  <tr>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+                        <span class="mono" style="font-weight:600;"><%= item.kode_pesanan %></span>
+                        <% if (item.status === 'Baru') { %>
+                          <span class="chip chip-terracotta">Baru</span>
+                        <% } else if (item.status === 'Selesai') { %>
+                          <span class="chip chip-herb">Selesai</span>
+                        <% } else { %>
+                          <span class="chip chip-neutral"><%= item.status %></span>
+                        <% } %>
+                      </div>
+                      <div style="margin-top:0.25rem;color:var(--fg-secondary);"><%= item.nama_pelanggan %></div>
+                    </td>
+                    <td style="font-weight:600;"><%= item.makanan %></td>
+                    <td class="mono"><%= item.jumlah_porsi %></td>
+                    <td class="mono"><%= new Date(item.tanggal_acara).toLocaleDateString('id-ID') %></td>
+                    <td style="max-width:260px;">
+                      <div><%= item.alamat %></div>
+                      <% if (item.latitude != null && item.longitude != null) { %>
+                        <a class="order-map-link" target="_blank" rel="noopener noreferrer"
+                          href="https://www.openstreetmap.org/?mlat=<%= item.latitude %>&mlon=<%= item.longitude %>#map=17/<%= item.latitude %>/<%= item.longitude %>">
+                          Lihat titik di peta
+                        </a>
+                      <% } %>
+                    </td>
+                    <td>
+                      <form data-form-status data-id="<%= item.id_pesanan %>" class="status-form">
+                        <label class="sr-only" for="status-<%= item.id_pesanan %>">Status pesanan <%= item.kode_pesanan %></label>
+                        <select id="status-<%= item.id_pesanan %>" name="status" class="field-select">
+                          <% ['Baru', 'Diproses', 'Selesai'].forEach(function (status) { %>
+                            <option value="<%= status %>" <%= item.status === status ? 'selected' : '' %>><%= status %></option>
+                          <% }); %>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+        <p id="hasil-update-status" aria-live="polite" style="margin-top:0.75rem;font-size:0.875rem;color:var(--fg-secondary);"></p>
       </div>
-      <% if (pesanan.length === 0) { %>
-        <p class="mt-5 text-sm text-stone-500">Belum ada pesanan masuk.</p>
-      <% } else { %>
-      <div class="mt-5 overflow-x-auto rounded-lg border border-stone-200 bg-white">
-        <table class="w-full min-w-[850px] text-left text-sm">
-          <thead class="bg-stone-50 text-stone-600"><tr>
-            <th class="p-3">Kode / Pelanggan</th><th class="p-3">Menu</th><th class="p-3">Porsi</th>
-            <th class="p-3">Tanggal acara</th><th class="p-3">Alamat / Lokasi</th><th class="p-3">Status</th>
-          </tr></thead>
-          <tbody class="divide-y divide-stone-100">
-          <% pesanan.forEach(function (item) { %>
-            <tr>
-              <td class="p-3"><div class="font-medium"><%= item.kode_pesanan %> <% if (item.status === 'Baru') { %><span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Baru</span><% } %></div><div class="mt-1 text-stone-500"><%= item.nama_pelanggan %></div></td>
-              <td class="p-3"><%= item.makanan %></td><td class="p-3"><%= item.jumlah_porsi %></td>
-              <td class="p-3"><%= new Date(item.tanggal_acara).toLocaleDateString('id-ID') %></td>
-              <td class="max-w-xs p-3"><div><%= item.alamat %></div><% if (item.latitude != null && item.longitude != null) { %><a class="mt-1 inline-block text-xs text-blue-700 underline" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=<%= item.latitude %>&mlon=<%= item.longitude %>#map=17/<%= item.latitude %>/<%= item.longitude %>">Lihat titik di peta</a><% } %></td>
-              <td class="p-3"><form data-form-status data-id="<%= item.id_pesanan %>" class="flex gap-2">
-                <select name="status" class="rounded border border-stone-300 px-2 py-1">
-                  <% ['Baru', 'Diproses', 'Selesai'].forEach(function (status) { %><option value="<%= status %>" <%= item.status === status ? 'selected' : '' %>><%= status %></option><% }); %>
-                </select><button class="rounded bg-stone-900 px-3 py-1 text-white">Simpan</button>
-              </form></td>
-            </tr>
-          <% }); %>
-          </tbody>
-        </table>
-      </div>
-      <% } %>
-      <p id="hasil-update-status" aria-live="polite" class="mt-3 text-sm text-stone-600"></p>
     </section>
     <% } %>
 
-    <section id="produk" class="px-6 lg:px-10 py-8">
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-4">
-        <h2 class="text-xl font-semibold tracking-tight">Daftar Produk</h2>
-        <div class="flex items-center gap-4">
-          <span class="text-sm text-stone-500"><%= produk.length %> produk</span>
-          <% if (isAdmin) { %>
-            <button type="button" id="btn-tambah" class="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800">Tambah Produk</button>
-          <% } %>
+    <section id="produk" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Menu Dapur Manado</h2>
+            <p class="section-subtitle">Pilih hidangan langsung dari buku menu kami, lalu tentukan jumlah porsi serta alamat pengantaran lewat chat.</p>
+          </div>
+          <div class="section-meta">
+            <span class="section-count mono"><%= produk.length %> hidangan</span>
+            <% if (isAdmin) { %>
+              <button type="button" id="btn-tambah" class="btn btn-primary">Tambah Produk</button>
+            <% } %>
+          </div>
         </div>
-      </div>
 
-      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        <% produk.forEach(function (item) { %>
-          <article class="flex flex-col rounded-lg border border-stone-200 bg-white p-5">
-            <span class="text-xs font-medium uppercase tracking-wide text-stone-500">Stok: <%= item.stok %></span>
-            <h3 class="mt-3 text-lg font-medium"><%= item.makanan %></h3>
-            <p class="mt-2 flex-1 text-sm leading-relaxed text-stone-600"><%= item.deskripsi %></p>
-            <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
-              <p class="text-sm font-semibold"><%= formatRupiah(item.harga) %></p>
-              <div class="flex items-center gap-3">
-                <% if (!isAdmin) { %><button type="button" data-order-product="<%= item.id_makanan %>"
-                  class="rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-800">Pesan</button><% } %>
-              <% if (isAdmin) { %><div class="flex items-center gap-3 text-xs">
-                <button type="button" data-edit
-                  data-id="<%= item.id_makanan %>"
-                  data-makanan="<%= item.makanan %>"
-                  data-harga="<%= item.harga %>"
-                  data-stok="<%= item.stok %>"
-                  data-deskripsi="<%= item.deskripsi %>"
-                  class="text-stone-600 hover:text-stone-900">Edit</button>
-                <button type="button" data-hapus
-                  data-id="<%= item.id_makanan %>"
-                  data-makanan="<%= item.makanan %>"
-                  class="text-red-700 hover:text-red-800">Hapus</button>
-              </div><% } %>
-              </div>
+        <% if (produk.length === 0) { %>
+          <div class="empty-state-box">
+            <p class="empty-state-title">Belum ada hidangan di daftar menu</p>
+            <p class="empty-state-copy">Data katalog makanan sedang kosong. Tambahkan menu baru dari akun admin atau cek kembali beberapa saat lagi.</p>
+            <div class="empty-state-actions">
+              <% if (isAdmin) { %>
+                <button type="button" id="btn-tambah-empty" class="btn btn-primary">Tambah Menu Pertama</button>
+              <% } else { %>
+                <button type="button" id="btn-chat-empty" class="btn btn-secondary">Tanya Lewat Chat</button>
+              <% } %>
             </div>
-          </article>
-        <% }); %>
+          </div>
+        <% } else { %>
+          <% if (featuredDish) { %>
+            <article class="featured-dish">
+              <div class="t-tilt" id="featured-tilt">
+                <div class="t-tilt-card featured-media-frame">
+                  <img src="<%= featuredPhoto.src %>" alt="<%= featuredPhoto.alt %>"
+                    width="<%= featuredPhoto.width %>" height="<%= featuredPhoto.height %>"
+                    loading="lazy" class="featured-media-img">
+                  <div class="t-tilt-glare" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div class="featured-body">
+                <div class="featured-meta-row">
+                  <span class="chip chip-terracotta">Sorotan Dapur</span>
+                  <% if (Number(featuredDish.stok) > 0) { %>
+                    <span class="chip chip-herb">Stok tersedia: <%= featuredDish.stok %></span>
+                  <% } else { %>
+                    <span class="chip chip-danger">Stok habis</span>
+                  <% } %>
+                </div>
+
+                <h3 class="featured-title"><%= featuredDish.makanan %></h3>
+                <p class="featured-desc"><%= featuredDish.deskripsi %></p>
+
+                <div class="featured-footer">
+                  <p class="price-tag price-tag--lg"><%= formatRupiah(featuredDish.harga) %></p>
+                  <div class="dish-actions">
+                    <% if (!isAdmin) { %>
+                      <button type="button"
+                        data-order-product="<%= featuredDish.id_makanan %>"
+                        data-order-name="<%= featuredDish.makanan %>"
+                        class="btn btn-primary">Pesan Hidangan Ini</button>
+                    <% } else { %>
+                      <button type="button" data-edit
+                        data-id="<%= featuredDish.id_makanan %>"
+                        data-makanan="<%= featuredDish.makanan %>"
+                        data-harga="<%= featuredDish.harga %>"
+                        data-stok="<%= featuredDish.stok %>"
+                        data-deskripsi="<%= featuredDish.deskripsi %>"
+                        class="btn btn-secondary btn-sm">Edit</button>
+                      <button type="button" data-hapus
+                        data-id="<%= featuredDish.id_makanan %>"
+                        data-makanan="<%= featuredDish.makanan %>"
+                        class="btn btn-danger-ghost btn-sm">Hapus</button>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </article>
+          <% } %>
+
+          <% if (sisaProduk.length > 0) { %>
+            <div class="menu-ledger">
+              <% sisaProduk.forEach(function (item) {
+                const fotoItem = cariFotoProduk(item.makanan);
+              %>
+                <article class="menu-row">
+                  <% if (fotoItem) { %>
+                    <div class="menu-row-thumb">
+                      <img src="<%= fotoItem.src %>" alt="<%= fotoItem.alt %>"
+                        width="<%= fotoItem.width %>" height="<%= fotoItem.height %>" loading="lazy">
+                    </div>
+                  <% } %>
+                  <div class="menu-row-content">
+                    <div class="menu-row-top">
+                      <h3 class="menu-row-title"><%= item.makanan %></h3>
+                      <% if (Number(item.stok) > 0) { %>
+                        <span class="chip chip-herb">Stok <%= item.stok %></span>
+                      <% } else { %>
+                        <span class="chip chip-danger">Habis</span>
+                      <% } %>
+                    </div>
+                    <p class="menu-row-desc"><%= item.deskripsi %></p>
+                    <div class="menu-row-bottom">
+                      <p class="price-tag price-tag--md"><%= formatRupiah(item.harga) %></p>
+                      <div class="dish-actions">
+                        <% if (!isAdmin) { %>
+                          <button type="button"
+                            data-order-product="<%= item.id_makanan %>"
+                            data-order-name="<%= item.makanan %>"
+                            class="btn btn-primary btn-sm">Pesan</button>
+                        <% } else { %>
+                          <button type="button" data-edit
+                            data-id="<%= item.id_makanan %>"
+                            data-makanan="<%= item.makanan %>"
+                            data-harga="<%= item.harga %>"
+                            data-stok="<%= item.stok %>"
+                            data-deskripsi="<%= item.deskripsi %>"
+                            class="btn btn-ghost btn-sm">Edit</button>
+                          <button type="button" data-hapus
+                            data-id="<%= item.id_makanan %>"
+                            data-makanan="<%= item.makanan %>"
+                            class="btn btn-danger-ghost btn-sm">Hapus</button>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              <% }); %>
+            </div>
+          <% } %>
+        <% } %>
       </div>
     </section>
 
-    <section id="galeri" class="px-6 lg:px-10 py-8">
-      <div class="flex items-baseline justify-between border-b border-stone-200 pb-4">
-        <h2 class="text-xl font-semibold tracking-tight">Galeri Makanan</h2>
-      </div>
+    <section id="galeri" class="section-block section-block--sand">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Dari Dapur Kami</h2>
+            <p class="section-subtitle">Potret sajian asli Sulawesi Utara yang disiapkan hangat sebelum diantar.</p>
+          </div>
+          <div class="gallery-controls">
+            <button type="button" data-galeri="prev" aria-label="Geser galeri ke kiri" class="gallery-icon-btn">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button type="button" id="galeri-pause" aria-pressed="false" class="gallery-icon-btn">
+              <span id="galeri-pause-label">Jeda</span>
+            </button>
+            <button type="button" data-galeri="next" aria-label="Geser galeri ke kanan" class="gallery-icon-btn">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
 
-      <div class="relative mt-6">
-        <button type="button" data-galeri="prev" aria-label="Geser galeri ke kiri"
-          class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-stone-300 bg-white/90 text-lg text-stone-700 hover:bg-white">
-          &lt;
-        </button>
-
-        <div id="galeri-track" data-unique="<%= galeri.length %>" class="no-scrollbar flex gap-4 overflow-x-auto">
+        <div id="galeri-track" data-unique="<%= galeri.length %>" class="gallery-track no-scrollbar" tabindex="0" aria-label="Galeri foto makanan Manado">
           <% for (let salinan = 0; salinan < 3; salinan++) { %>
             <% galeri.forEach(function (foto) { %>
-              <figure class="h-48 w-64 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white sm:h-60 sm:w-80">
-                <img src="<%= foto.src %>" alt="<%= foto.alt %>" loading="lazy" class="h-full w-full object-cover">
+              <figure class="gallery-card"<% if (salinan > 0) { %> aria-hidden="true"<% } %>>
+                <div class="gallery-img-wrap">
+                  <img src="<%= foto.src %>" alt="<%= salinan === 0 ? foto.alt : '' %>" width="<%= foto.width %>" height="<%= foto.height %>" loading="lazy">
+                </div>
+                <figcaption class="gallery-caption"><%= foto.caption %></figcaption>
               </figure>
             <% }); %>
           <% } %>
         </div>
-
-        <button type="button" data-galeri="next" aria-label="Geser galeri ke kanan"
-          class="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-stone-300 bg-white/90 text-lg text-stone-700 hover:bg-white">
-          &gt;
-        </button>
       </div>
     </section>
 
-    <section id="api" class="px-6 lg:px-10 py-8">
-      <div class="border-b border-stone-200 pb-4">
-        <h2 class="text-xl font-semibold tracking-tight">Endpoint API</h2>
-      </div>
+    <section class="section-block" aria-label="Pelacakan pesanan dan dokumentasi API">
+      <div class="container utility-grid">
+        <div id="cek-pesanan" class="panel-card">
+          <h2 class="section-title" style="font-size:1.55rem;">Cek Status Pesanan</h2>
+          <p class="section-subtitle" style="margin-top:0.35rem;">Sudah memesan lewat chat? Masukkan kode pesanan kamu untuk melihat status terbaru dari dapur.</p>
 
-      <div class="mt-6 divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
-        <a href="/api/status" class="flex flex-col gap-1 p-5 hover:bg-stone-50 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">GET</span>
-            <code class="text-sm">/api/status</code>
+          <form id="form-cek-pesanan" novalidate>
+            <div class="lookup-form-row">
+              <div class="lookup-field-col t-input-wrap" id="kode-input-wrap">
+                <label for="input-kode-pesanan" class="field-label">Kode pesanan</label>
+                <input id="input-kode-pesanan" name="kode" required maxlength="16" autocomplete="off"
+                  placeholder="Contoh: MAN-A1B2C3D4"
+                  class="field-input mono t-input">
+                <p id="kode-error-msg" class="t-error-msg">Masukkan kode pesanan terlebih dahulu.</p>
+              </div>
+              <div class="lookup-submit-col">
+                <button type="submit" id="btn-cek-pesanan" class="btn btn-primary" style="width:100%;">Cek Status</button>
+              </div>
+            </div>
+          </form>
+
+          <div id="box-cek-pesanan" class="lookup-status-box" aria-live="polite">
+            <span class="lookup-check-slot">
+              <span class="t-success-check" id="cek-success-icon" data-state="out" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            </span>
+            <div class="lookup-result-content">
+              <span id="hasil-cek-pesanan" class="t-text-swap">Status pesanan akan tampil di sini setelah kode diperiksa.</span>
+              <div id="detail-cek-pesanan" class="lookup-meta-detail" hidden></div>
+            </div>
           </div>
-          <span class="text-sm text-stone-500">Status server</span>
-        </a>
-        <a href="/api/produk" class="flex flex-col gap-1 p-5 hover:bg-stone-50 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">GET</span>
-            <code class="text-sm">/api/produk</code>
-          </div>
-          <span class="text-sm text-stone-500">Daftar produk</span>
-        </a>
-        <a href="/api/produk/1" class="flex flex-col gap-1 p-5 hover:bg-stone-50 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">GET</span>
-            <code class="text-sm">/api/produk/:id</code>
-          </div>
-          <span class="text-sm text-stone-500">produk ID 1</span>
-        </a>
-        <div class="flex flex-col gap-1 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">POST</span>
-            <code class="text-sm">/api/produk</code>
-          </div>
-          <span class="text-sm text-stone-500">Tambah produk</span>
         </div>
-        <div class="flex flex-col gap-1 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">PUT</span>
-            <code class="text-sm">/api/produk/:id</code>
+
+        <div id="api" class="panel-card">
+          <h2 class="section-title" style="font-size:1.55rem;">Endpoint API</h2>
+          <p class="section-subtitle" style="margin-top:0.35rem;">Daftar jalur REST JSON aktif untuk mengambil data menu, status server, dan pengelolaan katalog.</p>
+
+          <div class="api-list">
+            <% endpoints.forEach(function (ep) {
+              const badgeClass = ep.method === 'GET' ? 'http-get' : (ep.method === 'DELETE' ? 'http-delete' : 'http-post');
+            %>
+              <div class="api-row">
+                <div class="api-row-left">
+                  <span class="http-badge <%= badgeClass %>"><%= ep.method %></span>
+                  <% if (ep.href) { %>
+                    <a href="<%= ep.href %>" class="api-path api-path-link"><%= ep.path %></a>
+                  <% } else { %>
+                    <code class="api-path"><%= ep.path %></code>
+                  <% } %>
+                </div>
+                <div class="api-row-right">
+                  <span class="api-desc"><%= ep.desc %></span>
+                  <button type="button" class="api-copy-btn" data-copy-path="<%= ep.path %>" aria-label="Salin jalur <%= ep.path %>">Salin</button>
+                </div>
+              </div>
+            <% }); %>
           </div>
-          <span class="text-sm text-stone-500">Ubah produk</span>
-        </div>
-        <div class="flex flex-col gap-1 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="rounded bg-stone-100 px-2 py-1 text-xs font-semibold text-stone-700">DELETE</span>
-            <code class="text-sm">/api/produk/:id</code>
-          </div>
-          <span class="text-sm text-stone-500">Hapus produk</span>
         </div>
       </div>
     </section>
   </main>
 
-  <% if (isAdmin) { %><div id="modal-produk" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/40 px-4">
-    <div class="w-full max-w-md rounded-lg border border-stone-200 bg-white p-6">
-      <div class="flex items-center justify-between">
-        <h2 id="modal-judul" class="text-lg font-semibold tracking-tight">Tambah Produk</h2>
-        <button type="button" id="btn-tutup" aria-label="Tutup form"
-          class="flex h-8 w-8 items-center justify-center rounded-md text-stone-500 hover:bg-stone-100 hover:text-stone-900">
-          &times;
-        </button>
+  <% if (isAdmin) { %>
+  <div id="modal-produk" class="modal-backdrop" hidden>
+    <div id="modal-produk-dialog" class="modal-dialog t-modal" role="dialog" aria-modal="true" aria-labelledby="modal-judul">
+      <div class="modal-head">
+        <h2 id="modal-judul" class="modal-title">Tambah Produk</h2>
+        <button type="button" id="btn-tutup" aria-label="Tutup dialog produk" class="modal-close-btn">&times;</button>
       </div>
 
-      <form id="form-produk" class="mt-4 space-y-3">
+      <form id="form-produk" class="modal-form">
         <input type="hidden" name="id">
 
         <div>
-          <label for="input-makanan" class="text-sm text-stone-600">Nama makanan</label>
+          <label for="input-makanan" class="field-label">Nama makanan</label>
           <input id="input-makanan" name="makanan" required maxlength="50"
-            class="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none">
+            placeholder="Contoh: Cakalang Fufu Rica" class="field-input">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="modal-row-2">
           <div>
-            <label for="input-harga" class="text-sm text-stone-600">Harga</label>
+            <label for="input-harga" class="field-label">Harga (Rp)</label>
             <input id="input-harga" name="harga" type="number" min="0" required
-              class="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none">
+              placeholder="25000" class="field-input mono">
           </div>
           <div>
-            <label for="input-stok" class="text-sm text-stone-600">Stok</label>
+            <label for="input-stok" class="field-label">Stok porsi</label>
             <input id="input-stok" name="stok" type="number" min="0" required
-              class="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none">
+              placeholder="20" class="field-input mono">
           </div>
         </div>
 
         <div>
-          <label for="input-deskripsi" class="text-sm text-stone-600">Deskripsi</label>
+          <label for="input-deskripsi" class="field-label">Deskripsi</label>
           <textarea id="input-deskripsi" name="deskripsi" rows="3" required maxlength="256"
-            class="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none"></textarea>
+            placeholder="Tulis bahan utama, cita rasa, atau pelengkap sajian." class="field-textarea"></textarea>
         </div>
 
-        <p id="form-error" class="hidden text-sm text-red-700"></p>
+        <p id="form-error" role="alert" class="alert-error" style="margin-top:0;" hidden></p>
 
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" id="btn-batal"
-            class="rounded-md border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:border-stone-400">
-            Batal
-          </button>
-          <button type="submit"
-            class="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800">
-            Simpan
-          </button>
+        <div class="modal-actions">
+          <button type="button" id="btn-batal" class="btn btn-secondary">Batal</button>
+          <button type="submit" id="btn-simpan-produk" class="btn btn-primary">Simpan</button>
         </div>
       </form>
     </div>
-  </div><% } %>
+  </div>
+  <% } %>
+
+  <section id="chatbot-panel" aria-label="Asisten pemesanan makanan Manado" aria-hidden="true"
+    data-open="false" class="chat-panel t-panel-slide">
+    <header class="chat-header">
+      <div>
+        <h2 class="chat-header-title">Chat Makanan Manado</h2>
+        <p class="chat-header-sub">Jawaban berdasarkan data katalog aktif</p>
+      </div>
+      <button id="chat-close" type="button" aria-label="Tutup chatbot" class="chat-close-btn">&times;</button>
+    </header>
+
+    <div id="chat-messages"
+      data-products="<%= JSON.stringify(produk.map(function (item) { return { id: item.id_makanan, nama: item.makanan, harga: item.harga }; })) %>"
+      aria-live="polite" class="chat-feed">
+      <p class="chat-bubble chat-bubble--bot">Halo! Ada yang bisa saya bantu mengenai menu makanan khas Manado?</p>
+      <div class="chat-quick-row">
+        <button type="button" data-chat-quick="menu" class="chat-pill">Lihat Menu</button>
+        <button type="button" data-order-start class="chat-pill chat-pill--herb">Pesan Sekarang</button>
+      </div>
+    </div>
+
+    <form id="chat-form" class="chat-form">
+      <label for="chat-input" class="sr-only">Pertanyaan untuk chatbot</label>
+      <input id="chat-input" name="message" maxlength="500" required autocomplete="off"
+        placeholder="Tulis pertanyaan atau pesanan..." class="field-input" style="flex:1;min-width:0;">
+      <button id="chat-send" type="submit" class="btn btn-primary btn-sm">Kirim</button>
+    </form>
+  </section>
+
+  <button id="chat-toggle" type="button" aria-label="Buka chatbot makanan" aria-expanded="false" class="chat-fab">
+    <span class="t-icon-swap" id="chat-fab-icons" data-state="a" aria-hidden="true">
+      <span class="t-icon" data-icon="a">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" width="26" height="26">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 9h10M7 13h6m-7 7-3 1 1-4a8 8 0 1 1 3 3Z" />
+        </svg>
+      </span>
+      <span class="t-icon" data-icon="b">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </span>
+    </span>
+  </button>
+
+  <div id="app-toast" role="status" aria-live="polite" class="app-toast t-toast"></div>
+
+  <script>
+    (function () {
+      const heroBlock = document.getElementById('hero-stagger');
+      if (heroBlock) {
+        requestAnimationFrame(() => heroBlock.classList.add('is-shown'));
+      }
+
+      const mobileToggle = document.getElementById('mobile-nav-toggle');
+      const mobileDrawer = document.getElementById('mobile-nav-drawer');
+      if (mobileToggle && mobileDrawer) {
+        function setDrawer(open) {
+          mobileToggle.setAttribute('aria-expanded', String(open));
+          mobileToggle.setAttribute('aria-label', open ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+          mobileDrawer.hidden = !open;
+          mobileDrawer.classList.toggle('is-open', open);
+        }
+        mobileToggle.addEventListener('click', () => setDrawer(mobileDrawer.hidden));
+        mobileDrawer.querySelectorAll('a').forEach((link) => {
+          link.addEventListener('click', () => setDrawer(false));
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !mobileDrawer.hidden) {
+            setDrawer(false);
+            mobileToggle.focus();
+          }
+        });
+      }
+
+      const toast = document.getElementById('app-toast');
+      let toastTimer = null;
+      window.showNusantaraToast = function (text) {
+        if (!toast) return;
+        toast.textContent = text;
+        toast.classList.add('is-open');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('is-open'), 2400);
+      };
+
+      document.querySelectorAll('[data-copy-path]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const pathText = btn.dataset.copyPath;
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(pathText);
+            }
+            window.showNusantaraToast(`Disalin: ${pathText}`);
+          } catch (_) {
+            window.showNusantaraToast(`Jalur endpoint: ${pathText}`);
+          }
+        });
+      });
+
+      const tilt = document.getElementById('featured-tilt');
+      if (tilt) {
+        const card = tilt.querySelector('.t-tilt-card');
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const MAX = 10;
+
+        function resetTilt() {
+          tilt.classList.remove('is-hover');
+          card.classList.remove('is-tilting');
+          card.style.setProperty('--tilt-rx', '0deg');
+          card.style.setProperty('--tilt-ry', '0deg');
+        }
+        function trackTilt(e) {
+          if (reduce.matches) return;
+          const r = tilt.getBoundingClientRect();
+          const px = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+          const py = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+          tilt.classList.add('is-hover');
+          card.classList.add('is-tilting');
+          card.style.setProperty('--tilt-ry', ((px - 0.5) * MAX).toFixed(2) + 'deg');
+          card.style.setProperty('--tilt-rx', ((0.5 - py) * MAX).toFixed(2) + 'deg');
+          card.style.setProperty('--tilt-gx', (px * 100).toFixed(1) + '%');
+          card.style.setProperty('--tilt-gy', (py * 100).toFixed(1) + '%');
+        }
+        tilt.addEventListener('pointerdown', (e) => {
+          if (e.pointerType !== 'mouse') {
+            try { tilt.setPointerCapture(e.pointerId); } catch (_) {}
+          }
+        });
+        tilt.addEventListener('pointermove', trackTilt);
+        tilt.addEventListener('pointerup', resetTilt);
+        tilt.addEventListener('pointercancel', resetTilt);
+        tilt.addEventListener('pointerleave', (e) => {
+          if (e.pointerType === 'mouse') resetTilt();
+        });
+      }
+    })();
+  </script>
 
   <script>
     (function () {
       const track = document.getElementById('galeri-track');
       const prev = document.querySelector('[data-galeri="prev"]');
       const next = document.querySelector('[data-galeri="next"]');
-      if (!track || !prev || !next) return;
+      const pauseBtn = document.getElementById('galeri-pause');
+      const pauseLabel = document.getElementById('galeri-pause-label');
+      if (!track || !prev || !next || !pauseBtn) return;
 
       const slides = Array.from(track.children);
       const unique = Number(track.dataset.unique) || 1;
-      const loopWidth = slides[unique].offsetLeft - slides[0].offsetLeft;
-      const step = slides[0].offsetWidth + 16;
-      let paused = false;
-      let resumeTimer;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let userPaused = reduceMotion.matches;
+      let hoverPaused = false;
+      let resumeTimer = null;
+
+      function syncPauseButton() {
+        pauseBtn.setAttribute('aria-pressed', String(userPaused));
+        pauseLabel.textContent = userPaused ? 'Lanjutkan' : 'Jeda';
+      }
+      syncPauseButton();
+
+      function getLoopWidth() {
+        return slides[unique] ? slides[unique].offsetLeft - slides[0].offsetLeft : 0;
+      }
 
       function autoScroll() {
-        if (!paused && loopWidth > 0) {
-          track.scrollLeft += 0.7;
+        const loopWidth = getLoopWidth();
+        if (!userPaused && !hoverPaused && !reduceMotion.matches && loopWidth > 0) {
+          track.scrollLeft += 0.6;
           if (track.scrollLeft >= loopWidth) track.scrollLeft -= loopWidth;
         }
         requestAnimationFrame(autoScroll);
       }
 
       function pauseSementara() {
-        paused = true;
+        hoverPaused = true;
         clearTimeout(resumeTimer);
-        resumeTimer = setTimeout(() => { paused = false; }, 1800);
+        resumeTimer = setTimeout(() => { hoverPaused = false; }, 1800);
       }
 
-      track.addEventListener('mouseenter', () => { paused = true; });
-      track.addEventListener('mouseleave', () => { paused = false; });
+      pauseBtn.addEventListener('click', () => {
+        userPaused = !userPaused;
+        syncPauseButton();
+      });
+
+      track.addEventListener('mouseenter', () => { hoverPaused = true; });
+      track.addEventListener('mouseleave', () => { hoverPaused = false; });
       track.addEventListener('touchstart', pauseSementara, { passive: true });
 
       function geser(arah) {
         pauseSementara();
-        track.scrollBy({ left: arah * step, behavior: 'smooth' });
+        const step = (slides[0] ? slides[0].offsetWidth : 280) + 18;
+        track.scrollBy({ left: arah * step, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
       }
 
       prev.addEventListener('click', () => geser(-1));
@@ -315,51 +691,73 @@ const galeri = [
 
   <script>
     (function () {
-      const modal = document.getElementById('modal-produk');
+      const backdrop = document.getElementById('modal-produk');
+      const dialog = document.getElementById('modal-produk-dialog');
       const form = document.getElementById('form-produk');
       const judul = document.getElementById('modal-judul');
       const errorBox = document.getElementById('form-error');
       const btnTambah = document.getElementById('btn-tambah');
-      if (!modal || !form || !btnTambah) return;
+      const btnTambahEmpty = document.getElementById('btn-tambah-empty');
+      const btnSimpan = document.getElementById('btn-simpan-produk');
+      if (!backdrop || !dialog || !form) return;
 
-      function bukaModal(produk) {
+      const closeMs = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--modal-close-dur')
+      ) || 150;
+      let lastTrigger = null;
+
+      function bukaModal(produk, triggerEl) {
+        lastTrigger = triggerEl || document.activeElement;
         form.reset();
-        errorBox.classList.add('hidden');
+        errorBox.hidden = true;
         form.elements.id.value = produk ? produk.id : '';
         form.elements.makanan.value = produk ? produk.makanan : '';
         form.elements.harga.value = produk ? produk.harga : '';
         form.elements.stok.value = produk ? produk.stok : '';
         form.elements.deskripsi.value = produk ? produk.deskripsi : '';
         judul.textContent = produk ? 'Edit Produk' : 'Tambah Produk';
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+
+        backdrop.hidden = false;
+        dialog.classList.remove('is-closing');
+        void dialog.offsetWidth;
+        backdrop.classList.add('is-open');
+        dialog.classList.add('is-open');
         form.elements.makanan.focus();
       }
 
       function tutupModal() {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        backdrop.classList.remove('is-open');
+        dialog.classList.remove('is-open');
+        dialog.classList.add('is-closing');
+        setTimeout(() => {
+          dialog.classList.remove('is-closing');
+          backdrop.hidden = true;
+          if (lastTrigger && typeof lastTrigger.focus === 'function') lastTrigger.focus();
+        }, closeMs);
       }
 
-      btnTambah.addEventListener('click', () => bukaModal(null));
+      if (btnTambah) btnTambah.addEventListener('click', () => bukaModal(null, btnTambah));
+      if (btnTambahEmpty) btnTambahEmpty.addEventListener('click', () => bukaModal(null, btnTambahEmpty));
       document.getElementById('btn-tutup').addEventListener('click', tutupModal);
       document.getElementById('btn-batal').addEventListener('click', tutupModal);
 
-      modal.addEventListener('click', (event) => {
-        if (event.target === modal) tutupModal();
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) tutupModal();
       });
 
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !modal.classList.contains('hidden')) tutupModal();
+        if (event.key === 'Escape' && !backdrop.hidden) tutupModal();
       });
 
       document.querySelectorAll('[data-edit]').forEach((tombol) => {
-        tombol.addEventListener('click', () => bukaModal(tombol.dataset));
+        tombol.addEventListener('click', () => bukaModal(tombol.dataset, tombol));
       });
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        errorBox.classList.add('hidden');
+        errorBox.hidden = true;
+        btnSimpan.disabled = true;
+        btnSimpan.textContent = 'Menyimpan...';
 
         const data = Object.fromEntries(new FormData(form));
         const id = data.id;
@@ -374,21 +772,24 @@ const galeri = [
           const hasil = await response.json();
 
           if (!response.ok) {
-            errorBox.textContent = hasil.message || 'Gagal menyimpan produk';
-            errorBox.classList.remove('hidden');
+            errorBox.textContent = hasil.message || 'Gagal menyimpan produk.';
+            errorBox.hidden = false;
             return;
           }
 
           window.location.reload();
-        } catch (error) {
-          errorBox.textContent = 'Tidak bisa menghubungi server';
-          errorBox.classList.remove('hidden');
+        } catch (_) {
+          errorBox.textContent = 'Tidak bisa menghubungi server. Periksa koneksi lalu coba simpan lagi.';
+          errorBox.hidden = false;
+        } finally {
+          btnSimpan.disabled = false;
+          btnSimpan.textContent = 'Simpan';
         }
       });
 
       document.querySelectorAll('[data-hapus]').forEach((tombol) => {
         tombol.addEventListener('click', async () => {
-          if (!confirm(`Hapus "${tombol.dataset.makanan}"?`)) return;
+          if (!confirm(`Hapus "${tombol.dataset.makanan}" dari daftar menu?`)) return;
 
           try {
             const response = await fetch(`/api/produk/${tombol.dataset.id}`, {
@@ -397,13 +798,13 @@ const galeri = [
             });
 
             if (!response.ok) {
-              alert('Gagal menghapus produk');
+              window.showNusantaraToast('Gagal menghapus produk.');
               return;
             }
 
             window.location.reload();
-          } catch (error) {
-            alert('Tidak bisa menghubungi server');
+          } catch (_) {
+            window.showNusantaraToast('Tidak bisa menghubungi server.');
           }
         });
       });
@@ -413,25 +814,144 @@ const galeri = [
   <script>
     (function () {
       const formCek = document.getElementById('form-cek-pesanan');
+      const wrap = document.getElementById('kode-input-wrap');
+      const inputKode = document.getElementById('input-kode-pesanan');
+      const errorMsg = document.getElementById('kode-error-msg');
+      const btnCek = document.getElementById('btn-cek-pesanan');
+      const boxHasil = document.getElementById('box-cek-pesanan');
       const hasilCek = document.getElementById('hasil-cek-pesanan');
-      formCek.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        hasilCek.textContent = 'Memeriksa kode pesanan...';
-        const kode = new FormData(formCek).get('kode').trim();
-        try {
-          const response = await fetch(`/api/pesanan/status/${encodeURIComponent(kode)}`);
-          const result = await response.json();
-          hasilCek.textContent = response.ok
-            ? `Pesanan ${result.data.kode_pesanan}: ${result.data.status}`
-            : (result.message || 'Kode pesanan tidak ditemukan.');
-        } catch (_) { hasilCek.textContent = 'Tidak bisa menghubungi server.'; }
-      });
+      const detailCek = document.getElementById('detail-cek-pesanan');
+      const checkWrap = document.getElementById('cek-success-icon');
+
+      if (checkWrap) {
+        const path = checkWrap.querySelector('svg path');
+        if (path && typeof path.getTotalLength === 'function') {
+          const len = Math.ceil(path.getTotalLength()) + 1;
+          path.style.strokeDasharray = String(len);
+          path.style.strokeDashoffset = String(len);
+        }
+      }
+
+      const cs = getComputedStyle(document.documentElement);
+      const readMs = (name, fb) => {
+        const v = parseFloat(cs.getPropertyValue(name));
+        return Number.isFinite(v) ? v : fb;
+      };
+      const swapDur = readMs('--text-swap-dur', 150);
+
+      function swapStatusText(nextText) {
+        if (!hasilCek) return;
+        hasilCek.classList.add('is-exit');
+        setTimeout(() => {
+          hasilCek.textContent = nextText;
+          hasilCek.classList.remove('is-exit');
+          hasilCek.classList.add('is-enter-start');
+          void hasilCek.offsetHeight;
+          hasilCek.classList.remove('is-enter-start');
+        }, swapDur);
+      }
+
+      function triggerShakeError(msg) {
+        errorMsg.textContent = msg;
+        wrap.classList.add('is-error');
+        inputKode.classList.add('is-error');
+        inputKode.classList.remove('is-shaking');
+        void inputKode.offsetWidth;
+        inputKode.classList.add('is-shaking');
+
+        const shakeMs = readMs('--shake-dur-a', 80) * 2 + readMs('--shake-dur-b', 60) * 2;
+        setTimeout(() => inputKode.classList.remove('is-shaking'), shakeMs + 20);
+
+        if (wrap._revertTimer) clearTimeout(wrap._revertTimer);
+        const hold = readMs('--revert-hold', 3500);
+        wrap._revertTimer = setTimeout(() => {
+          wrap._revertTimer = null;
+          wrap.classList.remove('is-error');
+          inputKode.classList.remove('is-error');
+        }, shakeMs + hold);
+      }
+
+      if (inputKode) {
+        inputKode.addEventListener('input', () => {
+          if (wrap._revertTimer) {
+            clearTimeout(wrap._revertTimer);
+            wrap._revertTimer = null;
+          }
+          wrap.classList.remove('is-error');
+          inputKode.classList.remove('is-error');
+        });
+      }
+
+      if (formCek) {
+        formCek.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const kode = String(inputKode.value || '').trim();
+          if (wrap._revertTimer) {
+            clearTimeout(wrap._revertTimer);
+            wrap._revertTimer = null;
+          }
+          wrap.classList.remove('is-error');
+          inputKode.classList.remove('is-error', 'is-shaking');
+          boxHasil.classList.remove('is-found', 'is-not-found');
+          detailCek.hidden = true;
+          checkWrap.setAttribute('data-state', 'out');
+
+          if (!kode) {
+            triggerShakeError('Masukkan kode pesanan, contoh MAN-A1B2C3D4.');
+            boxHasil.classList.add('is-not-found');
+            swapStatusText('Kode pesanan belum diisi. Masukkan kode dari chat konfirmasi pesanan.');
+            inputKode.focus();
+            return;
+          }
+
+          btnCek.disabled = true;
+          btnCek.textContent = 'Memeriksa...';
+          swapStatusText('Memeriksa kode pesanan di dapur...');
+
+          try {
+            const response = await fetch(`/api/pesanan/status/${encodeURIComponent(kode)}`);
+            const result = await response.json();
+            if (response.ok && result.data) {
+              boxHasil.classList.add('is-found');
+              swapStatusText(`Pesanan ${result.data.kode_pesanan}: ${result.data.status}`);
+              if (result.data.dibuat_pada) {
+                const waktu = new Date(result.data.dibuat_pada).toLocaleString('id-ID', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                });
+                detailCek.textContent = `Dicatat pada ${waktu}`;
+                detailCek.hidden = false;
+              }
+              checkWrap.setAttribute('data-state', 'out');
+              void checkWrap.offsetWidth;
+              checkWrap.setAttribute('data-state', 'in');
+            } else {
+              const pesan = result.message || 'Kode pesanan tidak ditemukan.';
+              boxHasil.classList.add('is-not-found');
+              triggerShakeError(pesan);
+              swapStatusText(`${pesan} Pastikan huruf dan angka kode sudah sesuai.`);
+            }
+          } catch (_) {
+            boxHasil.classList.add('is-not-found');
+            triggerShakeError('Tidak bisa menghubungi server.');
+            swapStatusText('Tidak bisa menghubungi server. Coba periksa koneksi lalu ulangi.');
+          } finally {
+            btnCek.disabled = false;
+            btnCek.textContent = 'Cek Status';
+          }
+        });
+      }
 
       const hasilUpdate = document.getElementById('hasil-update-status');
       document.querySelectorAll('[data-form-status]').forEach((form) => {
         form.addEventListener('submit', async (event) => {
           event.preventDefault();
+          const submitBtn = form.querySelector('button[type="submit"]');
           const status = new FormData(form).get('status');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
+          }
           try {
             const response = await fetch(`/api/pesanan/${form.dataset.id}/status`, {
               method: 'PATCH',
@@ -439,83 +959,82 @@ const galeri = [
               body: JSON.stringify({ status }),
             });
             const result = await response.json();
-            if (!response.ok) { hasilUpdate.textContent = result.message || 'Gagal memperbarui status.'; return; }
+            if (!response.ok) {
+              if (hasilUpdate) hasilUpdate.textContent = result.message || 'Gagal memperbarui status pesanan.';
+              return;
+            }
             window.location.reload();
-          } catch (_) { hasilUpdate.textContent = 'Tidak bisa menghubungi server.'; }
+          } catch (_) {
+            if (hasilUpdate) hasilUpdate.textContent = 'Tidak bisa menghubungi server.';
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Simpan';
+            }
+          }
         });
       });
     })();
   </script>
 
-  <section id="chatbot-panel" aria-label="Chatbot makanan" aria-hidden="true"
-    class="fixed bottom-24 right-4 z-40 hidden h-[min(36rem,calc(100vh-8rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xl sm:right-6">
-    <header class="flex items-center justify-between bg-stone-900 px-4 py-3 text-white">
-      <div>
-        <h2 class="font-semibold">Chat Makanan Manado</h2>
-        <p class="text-xs text-stone-300">Jawaban berdasarkan data katalog</p>
-      </div>
-      <button id="chat-close" type="button" aria-label="Tutup chatbot" class="rounded px-2 py-1 text-xl hover:bg-stone-700">&times;</button>
-    </header>
-    <div id="chat-messages" data-products="<%= JSON.stringify(produk.map(function (item) { return { id: item.id_makanan, nama: item.makanan, harga: item.harga }; })) %>" aria-live="polite" class="flex-1 space-y-3 overflow-y-auto bg-stone-50 p-4">
-      <p class="max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm">Halo! Ada Yang bisa saya bantu mengenai makanan manado?</p>
-      <button type="button" data-chat-quick="menu" class="rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100">Lihat Menu</button>
-      <button type="button" data-order-start class="rounded-full border border-amber-700 bg-amber-700 px-3 py-1.5 text-sm text-white hover:bg-amber-800">Pesan Sekarang</button>
-    </div>
-    <form id="chat-form" class="flex gap-2 border-t border-stone-200 bg-white p-3">
-      <input id="chat-input" name="message" maxlength="500" required autocomplete="off"
-        placeholder="Tulis pertanyaan..." aria-label="Pertanyaan untuk chatbot"
-        class="min-w-0 flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none">
-      <button id="chat-send" type="submit" class="rounded-md bg-stone-900 px-3 py-2 text-sm font-medium text-white hover:bg-stone-800">Kirim</button>
-    </form>
-  </section>
-
-  <button id="chat-toggle" type="button" aria-label="Buka chatbot makanan" aria-expanded="false"
-    class="fixed bottom-5 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-stone-900 text-white shadow-lg hover:bg-stone-700 sm:right-6">
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-7 w-7">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M7 9h10M7 13h6m-7 7-3 1 1-4a8 8 0 1 1 3 3Z" />
-    </svg>
-  </button>
-
   <script>
     (function () {
       const panel = document.getElementById('chatbot-panel');
       const toggle = document.getElementById('chat-toggle');
+      const fabIcons = document.getElementById('chat-fab-icons');
       const close = document.getElementById('chat-close');
       const form = document.getElementById('chat-form');
       const input = document.getElementById('chat-input');
       const messages = document.getElementById('chat-messages');
       const send = document.getElementById('chat-send');
+      const heroOpenChat = document.getElementById('hero-open-chat');
+      const emptyOpenChat = document.getElementById('btn-chat-empty');
       const products = JSON.parse(messages.dataset.products || '[]');
+
       let orderStep = null;
       let orderDraft = null;
       let activeMap = null;
       let activeMapElement = null;
       const batasAntarMeter = 15000;
 
-      function setOpen(open) {
-        panel.classList.toggle('hidden', !open);
-        panel.classList.toggle('flex', open);
-        panel.classList.toggle('chat-open', open);
-        panel.setAttribute('aria-hidden', String(!open));
-        toggle.setAttribute('aria-expanded', String(open));
-        if (open) input.focus();
+      function isPanelOpen() {
+        return panel.getAttribute('data-open') === 'true';
       }
 
-      function tambahPesan(text, fromUser) {
+      function setOpen(open) {
+        panel.setAttribute('data-open', String(open));
+        panel.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Tutup chatbot makanan' : 'Buka chatbot makanan');
+        if (fabIcons) fabIcons.setAttribute('data-state', open ? 'b' : 'a');
+        if (open) {
+          setTimeout(() => input.focus(), 60);
+        }
+      }
+
+      function tambahPesan(text, fromUser, useShimmer) {
         const bubble = document.createElement('p');
         bubble.className = fromUser
-          ? 'chat-message ml-auto max-w-[90%] rounded-lg bg-stone-900 p-3 text-sm text-white'
-          : 'chat-message max-w-[90%] rounded-lg bg-white p-3 text-sm shadow-sm';
-        bubble.textContent = text;
+          ? 'chat-bubble chat-bubble--user'
+          : 'chat-bubble chat-bubble--bot';
+        if (useShimmer) {
+          const span = document.createElement('span');
+          span.className = 't-shimmer';
+          span.dataset.text = text;
+          span.textContent = text;
+          bubble.appendChild(span);
+        } else {
+          bubble.textContent = text;
+        }
         messages.appendChild(bubble);
         messages.scrollTop = messages.scrollHeight;
         return bubble;
       }
 
-      function tombolPilihan(label, attributes) {
+      function tombolPilihan(label, attributes, variantClass) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'mr-2 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100';
+        button.className = variantClass ? `chat-pill ${variantClass}` : 'chat-pill';
         button.textContent = label;
         Object.entries(attributes).forEach(([key, value]) => button.dataset[key] = value);
         messages.appendChild(button);
@@ -529,44 +1048,61 @@ const galeri = [
           return;
         }
         tambahPesan('Pilih menu yang ingin dipesan:', false);
-        products.forEach((product) => tombolPilihan(`${product.nama} — ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(product.harga))}`, { orderMenu: String(product.id) }));
+        const row = document.createElement('div');
+        row.className = 'chat-quick-row';
+        products.forEach((product) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'chat-pill';
+          const hargaStr = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            maximumFractionDigits: 0,
+          }).format(Number(product.harga));
+          button.textContent = `${product.nama}: ${hargaStr}`;
+          button.dataset.orderMenu = String(product.id);
+          row.appendChild(button);
+        });
+        messages.appendChild(row);
+        messages.scrollTop = messages.scrollHeight;
       }
 
       function tampilkanPetaAlamat() {
         if (typeof L === 'undefined') {
-          tambahPesan('Peta gagal dimuat. Muat ulang halaman lalu coba pilih lokasi lagi.', false);
+          tambahPesan('Peta belum siap dimuat. Ketik alamat lengkap area Manado secara manual di chat.', false);
           return;
         }
         if (activeMap) activeMap.remove();
         if (activeMapElement) activeMapElement.remove();
 
         const wrapper = document.createElement('div');
-        wrapper.className = 'chat-message max-w-full rounded-lg bg-white p-3 text-sm shadow-sm';
+        wrapper.className = 'chat-map-card';
         const instruksi = document.createElement('p');
-        instruksi.textContent = 'Pilih titik di peta jika tampil. Jika tidak, ketik alamat atau patokan lengkap secara manual di chat. Pengantaran hanya untuk daerah Manado.';
+        instruksi.textContent = 'Pilih titik di peta jika tampil. Jika tidak, ketik alamat atau patokan lengkap wilayah Manado di chat.';
         const mapElement = document.createElement('div');
-        mapElement.style.height = '210px';
-        mapElement.style.width = '100%';
-        mapElement.style.position = 'relative';
-        mapElement.style.overflow = 'hidden';
-        mapElement.style.backgroundColor = '#e5e7eb';
-        mapElement.className = 'mt-2 rounded border border-stone-300';
+        mapElement.className = 'chat-map-box';
         const statusLokasi = document.createElement('p');
-        statusLokasi.className = 'mt-2 text-xs text-stone-600';
+        statusLokasi.className = 'chat-map-status';
         statusLokasi.textContent = 'Titik lokasi belum dipilih.';
         wrapper.append(instruksi, mapElement, statusLokasi);
         messages.appendChild(wrapper);
         activeMapElement = wrapper;
 
         const manadoCenter = L.latLng(1.482384, 124.840379);
-        const lingkaran = L.circle(manadoCenter, { radius: batasAntarMeter });
+        const lingkaran = L.circle(manadoCenter, {
+          radius: batasAntarMeter,
+          color: '#B45309',
+          fillColor: '#B45309',
+          fillOpacity: 0.08,
+        });
         const map = L.map(mapElement, {
           scrollWheelZoom: false,
           maxBounds: lingkaran.getBounds(),
           maxBoundsViscosity: 1,
         }).setView(manadoCenter, 14);
         activeMap = map;
-        statusLokasi.textContent = `Leaflet ${L.version} aktif; menyiapkan ukuran peta...`;
+        statusLokasi.textContent = 'Menyiapkan peta area Manado...';
+
         const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
@@ -582,10 +1118,12 @@ const galeri = [
         });
         tiles.on('tileerror', () => {
           jumlahTileGagal += 1;
-          statusLokasi.textContent = 'Tile peta gagal dimuat dari OpenStreetMap. Periksa koneksi internet lalu muat ulang halaman.';
+          statusLokasi.textContent = 'Tile peta gagal dimuat. Kamu tetap bisa mengetik alamat wilayah Manado secara manual.';
         });
         tiles.addTo(map);
         lingkaran.addTo(map);
+
+        const pinSvg = '<svg width="26" height="30" viewBox="0 0 24 28" fill="none" aria-hidden="true"><path d="M12 1C6.48 1 2 5.48 2 11c0 7.1 10 16 10 16s10-8.9 10-16c0-5.52-4.48-10-10-10Z" fill="#B45309" stroke="#FFFFFF" stroke-width="2"/><circle cx="12" cy="11" r="3.5" fill="#FFFFFF"/></svg>';
 
         let marker = null;
         let lokasiValidTerakhir = null;
@@ -597,7 +1135,12 @@ const galeri = [
           if (!marker) {
             marker = L.marker(latlng, {
               draggable: true,
-              icon: L.divIcon({ className: 'manado-map-pin', html: '<span aria-hidden="true">📍</span>', iconSize: [32, 32], iconAnchor: [16, 30] }),
+              icon: L.divIcon({
+                className: 'manado-map-pin',
+                html: pinSvg,
+                iconSize: [26, 30],
+                iconAnchor: [13, 29],
+              }),
             }).addTo(map);
             marker.on('dragend', () => {
               const titik = marker.getLatLng();
@@ -617,10 +1160,9 @@ const galeri = [
         setTimeout(() => {
           map.invalidateSize({ pan: false });
           if (jumlahTileMasuk === 0 && jumlahTileGagal === 0) {
-            const size = map.getSize();
-            statusLokasi.textContent = `Leaflet ${L.version} aktif (${size.x}×${size.y}px), belum menerima tile peta.`;
+            statusLokasi.textContent = 'Peta belum menerima tile. Kamu bisa mengetik alamat wilayah Manado secara manual di bawah.';
           }
-        }, 1500);
+        }, 1800);
         messages.scrollTop = messages.scrollHeight;
       }
 
@@ -632,7 +1174,10 @@ const galeri = [
         orderDraft = {};
         if (idProduct) {
           const product = products.find((item) => String(item.id) === String(idProduct));
-          if (!product) { tambahPesan('Menu tidak ditemukan. Silakan muat ulang halaman.', false); return; }
+          if (!product) {
+            tambahPesan('Menu tidak ditemukan. Silakan muat ulang halaman.', false);
+            return;
+          }
           orderDraft.product = product;
           orderStep = 'jumlah';
           tambahPesan(`Kamu memilih ${product.nama}. Berapa jumlah porsi yang ingin dipesan?`, false);
@@ -683,8 +1228,21 @@ const galeri = [
             ? `${orderDraft.latitude.toFixed(6)}, ${orderDraft.longitude.toFixed(6)}`
             : 'tidak dipilih (alamat diisi manual)';
           tambahPesan(`Rangkuman pesanan:\nNama: ${orderDraft.nama}\nMenu: ${orderDraft.product.nama}\nJumlah: ${orderDraft.jumlah} porsi\nTanggal: ${orderDraft.tanggal}\nAlamat: ${orderDraft.alamat}\nTitik peta: ${titikPeta}\nTotal: ${rupiah}\n\nKetik "Ya" untuk menyimpan atau "Ubah" untuk mengisi ulang.`, false);
-          tombolPilihan('Ya, konfirmasi', { orderAction: 'ya' });
-          tombolPilihan('Ubah pesanan', { orderAction: 'ubah' });
+          const row = document.createElement('div');
+          row.className = 'chat-quick-row';
+          const btnYa = document.createElement('button');
+          btnYa.type = 'button';
+          btnYa.className = 'chat-pill chat-pill--herb';
+          btnYa.textContent = 'Ya, konfirmasi';
+          btnYa.dataset.orderAction = 'ya';
+          const btnUbah = document.createElement('button');
+          btnUbah.type = 'button';
+          btnUbah.className = 'chat-pill';
+          btnUbah.textContent = 'Ubah pesanan';
+          btnUbah.dataset.orderAction = 'ubah';
+          row.append(btnYa, btnUbah);
+          messages.appendChild(row);
+          messages.scrollTop = messages.scrollHeight;
         } else if (orderStep === 'konfirmasi') {
           if (/^ubah$/i.test(jawaban)) {
             tambahPesan('Baik, kita mulai ulang pesanan.', false);
@@ -717,33 +1275,71 @@ const galeri = [
           if (!response.ok) { tambahPesan(result.message || 'Pesanan gagal disimpan. Silakan coba lagi.', false); return; }
           orderStep = null;
           orderDraft = null;
-          tambahPesan(`Pesanan berhasil dicatat. Kode pesanan kamu: ${result.data.kode_pesanan}. Simpan kode ini untuk mengecek status pesanan.`, false);
-        } catch (_) { tambahPesan('Tidak bisa menghubungi server. Pesanan belum tersimpan, silakan coba lagi.', false); }
+          tambahPesan(`Pesanan berhasil dicatat. Kode pesanan kamu: ${result.data.kode_pesanan}. Simpan kode ini untuk mengecek status pesanan di bagian bawah halaman.`, false);
+        } catch (_) {
+          tambahPesan('Tidak bisa menghubungi server. Pesanan belum tersimpan, silakan coba lagi.', false);
+        }
       }
 
-      toggle.addEventListener('click', () => setOpen(panel.classList.contains('hidden')));
-      close.addEventListener('click', () => setOpen(false));
+      toggle.addEventListener('click', () => setOpen(!isPanelOpen()));
+      close.addEventListener('click', () => {
+        setOpen(false);
+        toggle.focus();
+      });
+
+      if (heroOpenChat) {
+        heroOpenChat.addEventListener('click', () => {
+          setOpen(true);
+          if (!orderStep) {
+            tambahPesan('Saya ingin memesan makanan.', true);
+            mulaiPesanan();
+          }
+        });
+      }
+
+      if (emptyOpenChat) {
+        emptyOpenChat.addEventListener('click', () => setOpen(true));
+      }
+
       messages.addEventListener('click', (event) => {
         const startButton = event.target.closest('[data-order-start]');
         if (startButton) { tambahPesan('Saya ingin memesan.', true); mulaiPesanan(); return; }
         const menuButton = event.target.closest('[data-order-menu]');
-        if (menuButton) { const product = products.find((item) => String(item.id) === menuButton.dataset.orderMenu); if (product) { tambahPesan(product.nama, true); prosesJawabanPesanan(String(product.id)); } return; }
+        if (menuButton) {
+          const product = products.find((item) => String(item.id) === menuButton.dataset.orderMenu);
+          if (product) {
+            tambahPesan(product.nama, true);
+            prosesJawabanPesanan(String(product.id));
+          }
+          return;
+        }
         const actionButton = event.target.closest('[data-order-action]');
-        if (actionButton) { const action = actionButton.dataset.orderAction; tambahPesan(action === 'ya' ? 'Ya' : 'Ubah', true); prosesJawabanPesanan(action); return; }
+        if (actionButton) {
+          const action = actionButton.dataset.orderAction;
+          tambahPesan(action === 'ya' ? 'Ya' : 'Ubah', true);
+          prosesJawabanPesanan(action);
+          return;
+        }
         const quickButton = event.target.closest('[data-chat-quick]');
         if (!quickButton) return;
         input.value = quickButton.dataset.chatQuick;
         form.requestSubmit();
       });
+
       document.querySelectorAll('[data-order-product]').forEach((button) => {
         button.addEventListener('click', () => {
           setOpen(true);
-          tambahPesan(`Saya ingin memesan ${button.closest('article').querySelector('h3').textContent}.`, true);
+          const namaProduk = button.dataset.orderName || 'menu pilihan';
+          tambahPesan(`Saya ingin memesan ${namaProduk}.`, true);
           mulaiPesanan(button.dataset.orderProduct);
         });
       });
+
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !panel.classList.contains('hidden')) setOpen(false);
+        if (event.key === 'Escape' && isPanelOpen()) {
+          setOpen(false);
+          toggle.focus();
+        }
       });
 
       form.addEventListener('submit', async (event) => {
@@ -753,10 +1349,11 @@ const galeri = [
         tambahPesan(message, true);
         input.value = '';
         if (orderStep) { prosesJawabanPesanan(message); return; }
+
         input.disabled = true;
         send.disabled = true;
         send.textContent = '...';
-        const pending = tambahPesan('Sedang mencari di data makanan...', false);
+        const pending = tambahPesan('Sedang mencari di data makanan...', false, true);
 
         try {
           const response = await fetch('/api/chat', {
@@ -766,7 +1363,7 @@ const galeri = [
           });
           const result = await response.json();
           pending.textContent = result.reply || result.message || 'Maaf, chatbot sedang tidak bisa menjawab.';
-        } catch (error) {
+        } catch (_) {
           pending.textContent = 'Tidak bisa menghubungi server. Coba lagi nanti.';
         } finally {
           input.disabled = false;

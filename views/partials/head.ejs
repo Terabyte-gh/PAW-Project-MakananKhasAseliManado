@@ -3,22 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= appName %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : appName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
-  <script src="/vendor/leaflet/leaflet.js"></script>
-  <style>
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    body { min-height: 100vh; display: flex; flex-direction: column; }
-    body > main { flex: 1 0 auto; }
-    button, a { transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
-    button:active { transform: scale(.97); }
-    #chatbot-panel.chat-open { animation: chat-enter 180ms ease-out both; }
-    .chat-message { animation: chat-enter 180ms ease-out both; }
-    .manado-map-pin { background: transparent; border: 0; text-align: center; font-size: 26px; line-height: 30px; }
-    @keyframes chat-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
-  </style>
+  <link rel="stylesheet" href="/css/nusantara.css">
+  <script src="/vendor/leaflet/leaflet.js" defer></script>
 </head>
-<body class="bg-stone-50 text-stone-900 antialiased">
+<body>
+  <a href="#konten-utama" class="skip-link">Langsung ke konten utama</a>
