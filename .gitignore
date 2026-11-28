@@ -2,3 +2,6 @@ node_modules/
 .aider*
 .env
 coverage/
+AGENTS.md
+DESIGN.md
+makanan-khas-aseli-manado/
